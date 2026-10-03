@@ -1,0 +1,2 @@
+export { platform } from './capacitor';
+
