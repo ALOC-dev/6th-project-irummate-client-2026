@@ -1,0 +1,101 @@
+# 이룸매이트 2학기 클라이언트 — 작업 규칙
+
+기숙사 룸메이트 매칭과 밥·취미·공동구매 "메이트" 모집을 하는 앱이다. v1.6 디자인(IrumGlass)을 기준으로 1학기 웹 코드를 새 구조로 옮겨 만든다.
+이 파일은 두 개발자(A, B)가 함께 쓰는 규칙이다. 개인 지침은 각자의 `CLAUDE.local.md`에 둔다.
+
+## 현재 상태
+
+- 저장소에는 2026-10-03에 만든 JavaScript 뼈대(`.jsx`, `BrowserRouter`, `app/guards`, `app/socket`, `shared/api/httpClient.js`)가 있다.
+- 0단계에서 이 뼈대를 아래 규칙(TypeScript strict, 데이터 라우터, 설계 문서의 폴더 구조)으로 옮긴다. 옮기기 전까지는 기존 파일을 새 규칙의 예시로 삼지 않는다.
+
+## 스택
+
+React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 라우터) · Tailwind v4(`@theme`) · Capacitor(Android) · Vitest + Testing Library · MSW · Playwright
+
+## 배포 대상
+
+- 사용자 서비스는 **Android 앱만** 낸다. 사용자용 웹은 없다.
+- 관리자 화면은 **앱과 관리자 웹** 두 곳에 있다.
+  - 앱: 관리자 계정일 때만 관리자 화면 묶음을 지연 로딩한다.
+  - 관리자 웹: Vercel에 올린다. 로그인·카카오 콜백·관리자 화면만 등록한다.
+- 빌드 대상 값은 `app` 또는 `admin-web`이다. `shared/config/env.ts`에서만 읽는다.
+- 앱 출시는 관리자 화면까지 모두 만든 뒤다.
+
+## 계층 규칙 (ESLint로 강제)
+
+- 의존 방향은 한 방향이다: `app → pages → features → shared`.
+- feature끼리 서로 import하지 않는다. 다른 feature는 그 feature의 `index.ts`(공개 API)로만 쓴다.
+- 페이지는 조립만 한다. API 호출과 도메인 규칙은 feature에 둔다.
+- 금지 패턴:
+  - `shared/api` 밖에서 axios 사용
+  - `shared/platform` 밖에서 Capacitor 사용
+  - 임의 색상값(색은 디자인 토큰으로만)
+  - `console` 출력
+  - 경로 문자열 직접 작성(화면 이동은 `app/router/paths.ts`로만)
+- 시트·오버레이는 URL 쿼리로 연다. Android 뒤로가기로 닫혀야 한다.
+
+## 인증·토큰 규칙 (반드시 지킨다)
+
+- 접근 토큰은 **메모리에만** 둔다(`features/auth/model/tokenStorage.ts`). localStorage·sessionStorage·Preferences·보안 저장소에 쓰지 않는다.
+- 앱을 시작하면 `AuthContext`가 재발급을 먼저 한 번 시도한다. 기기에서 토큰을 불러오는 단계는 없다.
+- 재발급 토큰:
+  - 앱은 **① 네이티브 HTTP(CapacitorHttp) 쿠키**가 기본이다. 실기기 시험에서 실패하면 **② 응답 본문 + 보안 저장소**로 바꾼다.
+  - ①과 ②의 차이는 `shared/api/client`의 재발급 전용 부분과 `shared/platform/secureStorage`에만 둔다. 재발급 요청은 그 한 곳에서만 만든다.
+  - 관리자 웹은 Vercel 프록시와 HttpOnly 쿠키(1학기 방식)를 쓴다.
+- 401이 오면 재발급 후 1회만 재시도한다. 동시에 들어온 재발급 요청은 하나로 합친다. 로그아웃은 401·403일 때만 하고, 네트워크 끊김으로는 하지 않는다.
+- 토큰·전화번호·학번은 로그나 오류 기록에 남기지 않는다.
+- XSS 방지:
+  - `dangerouslySetInnerHTML`을 쓰지 않는다.
+  - 사용자가 넣은 링크는 `http`·`https`일 때만 링크로 만든다.
+  - 사용자가 입력한 내용은 글자로만 표시한다.
+
+## 가입 단계
+
+- 단계는 `login → terms → intro → profile → verify → (인증 심사 중: 결정 항목) → done`이고, 관리자는 `admin`이다.
+- 단계 판정은 `features/auth/model/onboardingStage.ts`가 한다. 입력은 서버 상태와 소개 완료 표시(`introProgress`) 두 가지다.
+  - 소개 완료 표시는 사용자별로 기기에 남긴다. 민감 정보가 아니다.
+- 가입 화면은 다음 화면을 직접 정하지 않는다. 제출한 뒤 단계를 다시 판정해서 이동한다.
+- 가드:
+  - `AuthGate`: 로그인 여부
+  - `OnboardingGate`: 가입 단계
+  - `CertifiedGate`: done 단계만 통과
+  - `AdminGate`: admin 단계만 통과
+- 가드는 화면을 나누는 용도다. 실제 권한은 서버가 검사한다.
+
+## 소유권 (CODEOWNERS와 같다)
+
+- **A** (계정·룸메이트·관리자)
+  - feature: `auth`, `terms`, `profile`, `verification`, `roommate`, `admin`
+  - 공통 계층: `app`(`ChatSocketProvider` 제외), `shared/api`, `shared/platform`, `shared/config`
+- **B** (디자인 시스템·커뮤니티)
+  - feature: `dorm`, `mate-post`, `chat`, `notification`
+  - 공통 계층: `shared/styles`, `shared/ui`, `shared/lib`, `shared/assets`, `app/providers/ChatSocketProvider.tsx`
+- 계약 파일은 바꿀 때 상대의 리뷰가 필요하다: `app/router/paths.ts`, `features/auth/index.ts`, `shared/api/index.ts`, `shared/platform/index.ts`, `shared/ui/index.ts`, `package.json`
+- 계약을 바꿀 때는 선택 필드만 추가한다. 기존 이름은 바꾸지 않는다.
+- 상대가 소유한 폴더는 고치지 않는다. 필요하면 PR 설명에 요청을 적는다.
+
+## 공통 UI
+
+B가 `shared/ui/index.ts`에 공개하는 컴포넌트만 쓴다. 목록은 B가 이 절에 채운다.
+
+## 작업 방식
+
+- 브랜치는 기능 단위로 만든다(예: `feat/auth-token-storage`). 하루 한 번 이상 main 기준으로 rebase한다.
+- PR 하나에는 설계 문서의 파일 표 하나, 또는 화면 하나를 담는다.
+- 순수 함수(단계 판정, 금액 계산 등)는 테이블 테스트를 함께 만든다. API가 걸린 동작은 MSW로 시험한다.
+- 커밋 전에 `lint`, `typecheck`, `test`를 통과시킨다.
+- 구조나 방식이 바뀌는 결정은 `docs/adr/`에 남긴다.
+- 백엔드에 없는 API는 MSW 핸들러로 요청·응답 모양을 먼저 정하고, 백엔드에 같이 전달한다.
+
+## 보안
+
+- v1.6 디자인 원본(HTML)은 `draft/`에 커밋해 두고 화면 구현의 기준으로 쓴다. 읽기 쉬운 사본은 `docs-private/design/v1.6-source/`에 있다.
+- 이 저장소는 공개(public)다. 디자인 원본에 실제 개인정보나 키가 들어가지 않게 한다. 다음은 커밋하지 않는다:
+  - `.env`
+  - `docs-private/`
+  - `CLAUDE.local.md`
+- `.env`는 키 이름만 `.env.example`에 둔다.
+
+## 명령어
+
+0단계에서 `package.json`을 만든 뒤 채운다: `dev` · `build` · `lint` · `typecheck` · `test` · `test:e2e` · `gen:api`
