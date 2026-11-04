@@ -1,7 +1,7 @@
 # 이룸매이트 2학기 클라이언트 — 작업 규칙
 
 기숙사 룸메이트 매칭과 밥·취미·공동구매 "메이트" 모집을 하는 앱이다. v1.6 디자인(IrumGlass)을 기준으로 1학기 웹 코드를 새 구조로 옮겨 만든다.
-이 파일은 두 개발자(A, B)가 함께 쓰는 규칙이다. 개인 지침은 각자의 `CLAUDE.local.md`에 둔다.
+이 파일은 강현(iaruok)과 지원(uukdo)이 함께 사용하는 클라이언트 개발 규칙이다. 개인 지침은 각자의 `CLAUDE.local.md`에 둔다.
 
 ## 현재 상태
 
@@ -66,10 +66,10 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 
 ## 소유권 (CODEOWNERS와 같다)
 
-- **A** (계정·룸메이트·관리자)
+- **강현(iaruok)** (계정·룸메이트·관리자)
   - feature: `auth`, `terms`, `profile`, `verification`, `roommate`, `admin`
   - 공통 계층: `app`(`ChatSocketProvider` 제외), `shared/api`, `shared/platform`, `shared/config`
-- **B** (디자인 시스템·커뮤니티)
+- **지원(uukdo)** (디자인 시스템·커뮤니티)
   - feature: `dorm`, `mate-post`, `chat`, `notification`
   - 공통 계층: `shared/styles`, `shared/ui`, `shared/lib`, `shared/assets`, `app/providers/ChatSocketProvider.tsx`
 - 계약 파일은 바꿀 때 상대의 리뷰가 필요하다: `app/router/paths.ts`, `features/auth/index.ts`, `shared/api/index.ts`, `shared/platform/index.ts`, `shared/ui/index.ts`, `package.json`
@@ -78,7 +78,7 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 
 ## 공통 UI
 
-B가 `shared/ui/index.ts`에 공개하는 컴포넌트만 쓴다. 목록은 B가 이 절에 채운다.
+**uukdo**가 shared/ui/index.ts에 공개한 공통 컴포넌트만 사용한다. 컴포넌트 목록과 사용 규칙은 uukdo가 관리한다.
 
 ## 작업 방식
 
@@ -101,3 +101,40 @@ B가 `shared/ui/index.ts`에 공개하는 컴포넌트만 쓴다. 목록은 B가
 ## 명령어
 
 0단계에서 `package.json`을 만든 뒤 채운다: `dev` · `build` · `lint` · `typecheck` · `test` · `test:e2e` · `gen:api`
+
+## PR 검토 및 병합 규칙
+
+### 기본 원칙
+
+- 모든 기능 변경은 PR을 통해 `main`에 병합한다.
+- PR 작성자는 자신의 PR을 승인하거나 직접 병합하지 않는다.
+- `iaruok`의 PR은 `uukdo`, `uukdo`의 PR은 `iaruok`가 검토한다.
+- 상대 개발자의 승인(Approve) 1회와 필수 CI 통과 후 병합한다.
+- 승인 이후 새로운 커밋이 추가되면 재검토를 받는다.
+
+### Critical Review
+
+다음 항목은 **필수 검토 대상**이며, 문제가 해결되기 전까지 병합할 수 없다.
+
+1. **공통 계약 변경:** API, 라우팅, 공개 인터페이스 및 데이터 모델 변경
+2. **소유권 변경:** 상대 개발자의 담당 영역을 수정하는 경우
+3. **보안 변경:** 인증, 권한, 토큰 관리 및 민감정보 처리 로직 변경
+4. **아키텍처 변경:** 프로젝트 구조, 전역 상태 관리, 핵심 라이브러리 변경
+5. **기존 기능 영향:** 변경으로 기존 동작이 깨지거나 호환성이 손상되는 경우
+6. **검증 실패:** 빌드, 타입 검사, 필수 테스트 및 CI 실패
+
+### 변경 및 승인 절차
+
+- 공통 계약 및 아키텍처 변경은 **구현 전에 상대 개발자와 합의**한다.
+- 상대 개발자의 소유 영역을 수정해야 할 경우 사전에 협의한다.
+- Breaking Change는 영향 범위와 마이그레이션 방안을 PR에 명시한다.
+- 검토자가 Blocking Comment를 남기면 해결 및 재확인 전까지 병합하지 않는다.
+- 구조적 의사결정은 `docs/adr/`에 기록한다.
+
+### Merge Policy
+
+- `main` 직접 push 금지
+- 승인 없는 PR 병합 금지
+- 필수 CI 실패 시 병합 금지
+- 미해결 Blocking Comment가 있는 PR 병합 금지
+- 승인 이후 코드 변경 시 재승인 필수
