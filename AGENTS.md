@@ -10,16 +10,18 @@
 
 ## 스택
 
-React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 라우터) · Tailwind v4(`@theme`) · Capacitor(Android) · Vitest + Testing Library · MSW · Playwright
+React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 라우터) · Tailwind v4(`@theme`) · Capacitor(Android·iOS) · Vitest + Testing Library · MSW · Playwright
 
 ## 배포 대상
 
-- 사용자 서비스는 **Android 앱만** 낸다. 사용자용 웹은 없다.
+- 사용자 서비스는 **Android·iOS 앱**으로 낸다. 사용자용 웹은 없다.
 - 관리자 화면은 **앱과 관리자 웹** 두 곳에 있다.
   - 앱: 관리자 계정일 때만 관리자 화면 묶음을 지연 로딩한다.
   - 관리자 웹: Vercel에 올린다. 로그인·카카오 콜백·관리자 화면만 등록한다.
 - 빌드 대상 값은 `app` 또는 `admin-web`이다. `shared/config/env.ts`에서만 읽는다.
-- 앱 출시는 관리자 화면까지 모두 만든 뒤다.
+- 앱 출시(Google Play·App Store)는 관리자 화면까지 모두 만든 뒤다.
+- Android와 iOS는 같은 코드로 동작한다. 두 플랫폼의 차이(뒤로가기, 화면 가장자리, 키보드, 딥링크, 보안 저장소, 권한 안내 문구)는 \shared/platform과 각 네이티브 프로젝트 설정에서만 다룬다.
+- iOS 빌드·서명은 macOS(Xcode)에서만 된다. iOS 빌드 환경과 iOS 로그인 방식(App Store 심사 지침 4.8)은 결정 항목이다. 정해지기 전에는 추측해서 만들지 않는다.
 
 ## 계층 규칙 (ESLint로 강제)
 
@@ -32,7 +34,7 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
   - 임의 색상값(색은 디자인 토큰으로만)
   - `console` 출력
   - 경로 문자열 직접 작성(화면 이동은 `app/router/paths.ts`로만)
-- 시트·오버레이는 URL 쿼리로 연다. Android 뒤로가기로 닫혀야 한다.
+- 시트·오버레이는 URL 쿼리로 연다. 기록 뒤로가기(history back)로 닫혀야 한다. Android는 뒤로가기 버튼이 이 동작을 부르고, iOS에는 그런 버튼이 없으므로 화면 안에 닫기 수단(닫기 버튼, 바깥 영역 누르기)을 둔다.
 
 ## 인증·토큰 규칙 (반드시 지킨다)
 
