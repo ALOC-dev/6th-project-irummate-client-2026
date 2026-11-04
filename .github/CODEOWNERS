@@ -1,0 +1,43 @@
+# .github/CODEOWNERS — 아래쪽 줄이 위쪽 줄보다 우선합니다
+*                                             @iaruok @uukdo
+
+# iaruok — 계정·룸메이트
+/src/app/                                     @iaruok
+/src/shared/api/                              @iaruok
+/src/shared/platform/                         @iaruok
+/src/shared/config/                           @iaruok
+/src/features/auth/                           @iaruok
+/src/features/terms/                          @iaruok
+/src/features/profile/                        @iaruok
+/src/features/verification/                   @iaruok
+/src/features/roommate/                       @iaruok
+/src/pages/onboarding/                        @iaruok
+/src/pages/match/                             @iaruok
+/src/pages/my/                                @iaruok
+
+# uukdo — 디자인 시스템·커뮤니티
+/src/shared/styles/                           @uukdo
+/src/shared/ui/                               @uukdo
+/src/shared/lib/                              @uukdo
+/src/shared/assets/                           @uukdo
+/src/features/dorm/                           @uukdo
+/src/features/mate-post/                      @uukdo
+/src/features/chat/                           @uukdo
+/src/features/notification/                   @uukdo
+/src/pages/home/                              @uukdo
+/src/pages/mate/                              @uukdo
+/src/pages/chat/                              @uukdo
+/src/pages/my/NotificationSettingsPage.tsx    @uukdo
+/src/app/providers/ChatSocketProvider.tsx     @uukdo
+
+# 관리자 화면 — iaruok
+/src/pages/admin/                             @iaruok
+/src/features/admin/                          @iaruok
+
+# 계약 파일 — 바꿀 때 상대의 승인이 필요
+/src/app/router/paths.ts                      @iaruok @uukdo
+/src/features/auth/index.ts                   @iaruok @uukdo
+/src/shared/api/index.ts                      @iaruok @uukdo
+/src/shared/platform/index.ts                 @iaruok @uukdo
+/src/shared/ui/index.ts                       @iaruok @uukdo
+/package.json                                 @iaruok @uukdo

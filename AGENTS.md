@@ -5,8 +5,8 @@
 
 ## 현재 상태
 
-- 저장소에는 2026-10-03에 만든 JavaScript 뼈대(`.jsx`, `BrowserRouter`, `app/guards`, `app/socket`, `shared/api/httpClient.js`)가 있다.
-- 0단계에서 이 뼈대를 아래 규칙(TypeScript strict, 데이터 라우터, 설계 문서의 폴더 구조)으로 옮긴다. 옮기기 전까지는 기존 파일을 새 규칙의 예시로 삼지 않는다.
+- 0단계 진행 중. 설정 파일(TypeScript strict, Vite, ESLint 계층 규칙, Vitest, Playwright, Capacitor, CI)은 옮겼다. 결정 기록은 `docs/adr/0001-stage0-skeleton.md`.
+- iaruok 영역의 옛 JavaScript 뼈대는 지웠다. uukdo 영역의 옛 `.js`/`.jsx`(`features/chat`, `features/mate-post`, `shared/ui`, `shared/lib`, `pages/HomePage.jsx`, `app/socket`)는 uukdo가 정리할 때까지 남아 있으며, lint·typecheck·빌드 대상이 아니다. 새 규칙의 예시로 삼지 않는다.
 
 ## 스택
 
@@ -83,7 +83,7 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 ## 작업 방식
 
 - 브랜치는 기능 단위로 만든다(예: `feat/auth-token-storage`). 하루 한 번 이상 main 기준으로 rebase한다.
-- PR 하나에는 설계 문서의 파일 표 하나, 또는 화면 하나를 담는다.
+- PR 하나에는 화면 하나, 또는 같은 목적의 파일 묶음 하나(예: `shared/api`, 프로젝트 설정)를 담는다.
 - 순수 함수(단계 판정, 금액 계산 등)는 테이블 테스트를 함께 만든다. API가 걸린 동작은 MSW로 시험한다.
 - 커밋 전에 `lint`, `typecheck`, `test`를 통과시킨다.
 - 구조나 방식이 바뀌는 결정은 `docs/adr/`에 남긴다.
@@ -100,7 +100,13 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 
 ## 명령어
 
-0단계에서 `package.json`을 만든 뒤 채운다: `dev` · `build` · `lint` · `typecheck` · `test` · `test:e2e` · `gen:api`
+- `npm run dev` / `npm run dev:admin-web`: 개발 서버 (앱 / 관리자 웹 빌드 대상)
+- `npm run build` / `npm run build:admin-web`: 빌드 → `dist/` / `dist-admin-web/`
+- `npm run lint`: ESLint (계층 규칙은 `src/test/eslint/boundaries.test.ts`로도 검사)
+- `npm run typecheck`: TypeScript 검사 (`src`·`e2e`와 설정 파일)
+- `npm test`: Vitest
+- `npm run test:e2e`: Playwright (개발 서버 + MSW)
+- `npm run gen:api`: 백엔드 OpenAPI → `src/shared/api/generated/schema.d.ts` (`OPENAPI_URL` 필요)
 
 ## PR 검토 및 병합 규칙
 
