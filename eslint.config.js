@@ -118,6 +118,10 @@ export default tseslint.config(
     files: ['**/*.{ts,tsx}'],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: { globals: { ...globals.browser } },
+    rules: {
+      // 웹 대체 구현처럼 시그니처만 맞추는 인자는 _로 시작한다.
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    },
   },
   {
     files: ['*.config.ts', 'e2e/**/*.ts'],

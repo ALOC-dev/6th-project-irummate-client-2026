@@ -53,14 +53,14 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 
 ## 가입 단계
 
-- 단계는 `login → terms → intro → profile → verify → (인증 심사 중: 결정 항목) → done`이고, 관리자는 `admin`이다.
+- 단계는 `login → terms → intro → profile → certification → (인증 심사 중: 결정 항목) → certified`이고, 관리자는 `admin`이다.
 - 단계 판정은 `features/auth/model/onboardingStage.ts`가 한다. 입력은 서버 상태와 소개 완료 표시(`introProgress`) 두 가지다.
   - 소개 완료 표시는 사용자별로 기기에 남긴다. 민감 정보가 아니다.
 - 가입 화면은 다음 화면을 직접 정하지 않는다. 제출한 뒤 단계를 다시 판정해서 이동한다.
 - 가드:
   - `AuthGate`: 로그인 여부
   - `OnboardingGate`: 가입 단계
-  - `CertifiedGate`: done 단계만 통과
+  - `CertifiedGate`: certified 단계만 통과
   - `AdminGate`: admin 단계만 통과
 - 가드는 화면을 나누는 용도다. 실제 권한은 서버가 검사한다.
 
