@@ -13,8 +13,9 @@ if (!source) {
   process.exit(1);
 }
 
+// 셸을 거치지 않고 실행해 주소의 & 같은 문자가 명령으로 해석되지 않게 한다.
 execFileSync(
-  'npx',
-  ['openapi-typescript', source, '-o', 'src/shared/api/generated/schema.d.ts'],
-  { stdio: 'inherit', shell: process.platform === 'win32' },
+  process.execPath,
+  ['node_modules/openapi-typescript/bin/cli.js', source, '-o', 'src/shared/api/generated/schema.d.ts'],
+  { stdio: 'inherit' },
 );
