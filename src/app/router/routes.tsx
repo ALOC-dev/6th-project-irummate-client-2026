@@ -11,7 +11,7 @@ import { AdminGate } from './guards/AdminGate';
 import { AuthGate } from './guards/AuthGate';
 import { CertifiedGate } from './guards/CertifiedGate';
 import { OnboardingGate } from './guards/OnboardingGate';
-import { paths } from './paths';
+import { paths, routePatterns } from './paths';
 
 // 사용자 페이지는 라우트 lazy로 불러온다.
 const page = (load: () => Promise<{ default: ComponentType }>) => async () => ({
@@ -73,12 +73,12 @@ const userRoute: RouteObject = {
         {
           element: <StackLayout />,
           children: [
-            { path: '/match/mates/:mateId', lazy: page(() => import('@pages/match/MateProfilePage')) },
-            { path: '/match/mates/:mateId/result', lazy: page(() => import('@pages/match/MatchResultPage')) },
+            { path: routePatterns.mateProfile, lazy: page(() => import('@pages/match/MateProfilePage')) },
+            { path: routePatterns.matchResult, lazy: page(() => import('@pages/match/MatchResultPage')) },
             { path: paths.chats, lazy: page(() => import('@pages/chat/ChatListPage')) },
-            { path: '/chats/:roomId', lazy: page(() => import('@pages/chat/ChatRoomPage')) },
+            { path: routePatterns.chatRoom, lazy: page(() => import('@pages/chat/ChatRoomPage')) },
             { path: paths.survey, lazy: page(() => import('@pages/my/SurveyEditPage')) },
-            { path: '/my/policies/:policyKey', lazy: page(() => import('@pages/my/PolicyPage')) },
+            { path: routePatterns.policy, lazy: page(() => import('@pages/my/PolicyPage')) },
             { path: paths.blocked, lazy: page(() => import('@pages/my/BlockedMatesPage')) },
             { path: paths.notificationSettings, lazy: page(() => import('@pages/my/NotificationSettingsPage')) },
           ],
