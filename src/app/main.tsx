@@ -5,6 +5,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router';
 import { authClientBindings } from '@features/auth';
 import { registerAuthHandlers } from '@shared/api';
 import { env } from '@shared/config/env';
+import '@shared/styles/index.css';
 
 import { AppProviders } from './providers/AppProviders';
 import { createQueryClient } from './providers/queryClient';
