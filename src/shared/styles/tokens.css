@@ -1,0 +1,174 @@
+@theme static {
+  --font-sans:
+    'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+    'Noto Sans KR', system-ui, sans-serif;
+
+  --color-blue-50: #eef4ff;
+  --color-blue-100: #dce8ff;
+  --color-blue-200: #b9d1ff;
+  --color-blue-300: #86afff;
+  --color-blue-400: #4d89ff;
+  --color-blue-500: #0061fe;
+  --color-blue-600: #0052d9;
+  --color-blue-700: #0043b3;
+  --color-blue-800: #00368f;
+  --color-blue-900: #062a6b;
+
+  --color-sky-100: #e3f2ff;
+  --color-sky-300: #a6d4ff;
+  --color-sky-400: #6cb8ff;
+  --color-sky-500: #2f95f0;
+
+  --color-sun-100: #fff5d6;
+  --color-sun-400: #ffcb47;
+  --color-sun-600: #b07c00;
+
+  --color-peach-100: #ffe8ee;
+  --color-peach-400: #ff8fab;
+
+  --color-mint-100: #ddf7ee;
+  --color-mint-400: #35cfa4;
+  --color-mint-600: #0b8a66;
+
+  --color-coral-100: #ffe6e6;
+  --color-coral-500: #e8464e;
+  --color-coral-550: #d93c44;
+  --color-coral-600: #c9323a;
+
+  --color-ink-50: #f4f6fb;
+  --color-ink-100: #eceff6;
+  --color-ink-200: #dee2ee;
+  --color-ink-300: #b9bfd4;
+  --color-ink-400: #767e9e;
+  --color-ink-500: #565f82;
+  --color-ink-700: #363e60;
+  --color-ink-800: #232a47;
+  --color-ink-900: #141a33;
+  --color-white: #ffffff;
+
+  --color-glass-nav: rgb(255 255 255 / 46%);
+  --color-glass-bar: rgb(255 255 255 / 52%);
+  --color-glass-card: rgb(255 255 255 / 62%);
+  --color-glass-soft: rgb(255 255 255 / 48%);
+  --color-glass-input: rgb(255 255 255 / 80%);
+  --color-glass-sheet: rgb(255 255 255 / 86%);
+  --color-glass-dark: rgb(20 26 51 / 78%);
+  --color-glass-edge: rgb(255 255 255 / 72%);
+
+  --radius-xs: 8px;
+  --radius-sm: 14px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --radius-xl: 32px;
+  --radius-pill: 999px;
+  --radius-card: 28px;
+  --radius-control: 18px;
+  --radius-sheet: 32px;
+
+  --shadow-xs: 0 1px 3px rgb(0 45 130 / 6%);
+  --shadow-sm: 0 4px 14px rgb(0 45 130 / 7%);
+  --shadow-md: 0 10px 30px rgb(0 45 130 / 9%);
+  --shadow-lg: 0 22px 56px rgb(0 45 130 / 18%);
+  --shadow-glass: 0 10px 30px rgb(0 45 130 / 7%), 0 1px 3px rgb(0 45 130 / 5%);
+  --shadow-brand: 0 10px 24px rgb(0 97 254 / 30%), inset 0 1px 0 rgb(255 255 255 / 28%);
+
+  --text-title-1: 24px;
+  --text-title-2: 19px;
+  --text-title-2--line-height: 26px;
+  --text-title-3: 17px;
+  --text-body: 15px;
+  --text-body-sm: 14px;
+  --text-caption: 12px;
+  --text-micro: 11px;
+
+  --tracking-irum-tight: -0.02em;
+  --tracking-irum-normal: -0.01em;
+  --ease-irum-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-irum-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@theme static {
+  --color-primary: var(--color-blue-500);
+  --color-primary-hover: #0057e6;
+  --color-primary-pressed: #0049c2;
+  --color-primary-strong: var(--color-blue-600);
+  --color-primary-soft: rgb(0 97 254 / 9%);
+  --color-primary-soft-hover: rgb(0 97 254 / 15%);
+
+  --color-fg-strong: var(--color-ink-900);
+  --color-fg-body: var(--color-ink-700);
+  --color-fg-muted: var(--color-ink-500);
+  --color-fg-subtle: var(--color-ink-400);
+  --color-fg-disabled: #a3a9c0;
+  --color-fg-on-brand: var(--color-white);
+  --color-fg-brand: var(--color-primary);
+  --color-fg-link: var(--color-primary-strong);
+
+  --color-surface-page: transparent;
+  --color-surface-card: var(--color-glass-card);
+  --color-surface-sunken: var(--color-glass-input);
+  --color-surface-overlay: rgb(20 26 51 / 32%);
+
+  --color-border-subtle: rgb(20 26 51 / 8%);
+  --color-border-default: rgb(20 26 51 / 16%);
+  --color-border-focus: var(--color-primary);
+
+  --color-success: var(--color-mint-600);
+  --color-success-soft: var(--color-mint-100);
+  --color-warning: var(--color-sun-600);
+  --color-warning-soft: var(--color-sun-100);
+  --color-danger: var(--color-coral-500);
+  --color-danger-soft: var(--color-coral-100);
+  --color-info: var(--color-sky-500);
+  --color-info-soft: var(--color-sky-100);
+}
+
+:root {
+  --app-background:
+    radial-gradient(70% 38% at 92% -4%, rgb(0 97 254 / 26%) 0%, rgb(0 97 254 / 0%) 70%),
+    radial-gradient(55% 30% at -6% 34%, rgb(64 150 255 / 20%) 0%, rgb(64 150 255 / 0%) 72%),
+    radial-gradient(70% 34% at 104% 78%, rgb(0 97 254 / 16%) 0%, rgb(0 97 254 / 0%) 70%),
+    radial-gradient(60% 30% at 10% 104%, rgb(120 190 255 / 20%) 0%, rgb(120 190 255 / 0%) 70%),
+    #f3f5fa;
+  --glass-filter: blur(22px) saturate(180%);
+  --glass-light: var(--color-glass-bar);
+  --glass-on-brand: rgb(255 255 255 / 22%);
+  --glass-highlight: inset 0 1px 0 rgb(255 255 255 / 90%), inset 0 -1px 0 rgb(255 255 255 / 25%);
+  --focus-ring: 0 0 0 4px rgb(0 97 254 / 18%);
+  --gradient-page: radial-gradient(80% 60% at 80% 0%, rgb(0 97 254 / 22%), rgb(0 97 254 / 0%) 70%);
+  --shadow-top: none;
+
+  --duration-fast: 120ms;
+  --duration-base: 220ms;
+  --duration-slow: 360ms;
+  --press-scale: 0.96;
+
+  --topbar-height: 58px;
+  --bottom-nav-height: 66px;
+  --bottom-nav-gap: 14px;
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --bottom-nav-clearance: calc(var(--bottom-nav-height) + var(--bottom-nav-gap) + 22px + var(--safe-area-bottom));
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --color-glass-nav: rgb(255 255 255 / 94%);
+    --color-glass-bar: rgb(246 248 253 / 96%);
+    --color-glass-card: rgb(255 255 255 / 92%);
+    --color-glass-soft: rgb(255 255 255 / 86%);
+    --color-glass-input: var(--color-white);
+    --color-glass-sheet: var(--color-white);
+    --color-glass-dark: rgb(20 26 51 / 95%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+  }
+}
