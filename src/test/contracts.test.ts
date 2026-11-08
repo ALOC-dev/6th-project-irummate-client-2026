@@ -1,10 +1,18 @@
-// uukdo 영역에서 쓰는 계약 4종의 모양을 고정한다. 여기서 타입 오류가 나면 계약이 깨진 것이다.
+// 두 영역에서 함께 쓰는 계약 5종의 모양을 고정한다. 여기서 타입 오류가 나면 계약이 깨진 것이다.
 import { describe, expectTypeOf, it } from 'vitest';
 
 import { paths } from '@app/router/paths';
 import { getAccessToken, useSession, type OnboardingStage, type SessionUser } from '@features/auth';
 import { apiClient, AppError, type AppErrorKind } from '@shared/api';
 import { externalBrowser, push, type Unsubscribe } from '@shared/platform';
+import {
+  Button,
+  GlassCard,
+  IconButton,
+  TextField,
+  type IconButtonProps,
+  type TextFieldProps,
+} from '@shared/ui';
 
 describe('계약', () => {
   it('paths', () => {
@@ -38,5 +46,14 @@ describe('계약', () => {
     expectTypeOf(externalBrowser.open).toEqualTypeOf<(url: string) => Promise<void>>();
     expectTypeOf(push.onReceive)
       .toEqualTypeOf<(handler: (p: { type: string; targetId?: string }) => void) => Unsubscribe>();
+  });
+
+  it('shared/ui', () => {
+    expectTypeOf(Button).toBeFunction();
+    expectTypeOf(GlassCard).toBeFunction();
+    expectTypeOf(IconButton).toBeFunction();
+    expectTypeOf(TextField).toBeFunction();
+    expectTypeOf<IconButtonProps['label']>().toBeString();
+    expectTypeOf<TextFieldProps['label']>().toBeString();
   });
 });
