@@ -16,7 +16,7 @@ const BASE = [
   'inline-flex items-center justify-center gap-2 rounded-control font-semibold',
   'transition-[background-color,box-shadow,transform] duration-[var(--duration-fast)] ease-irum-out',
   'focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]',
-  'active:scale-[var(--press-scale)] disabled:pointer-events-none disabled:opacity-40',
+  'active:scale-[var(--press-scale)] disabled:pointer-events-none',
 ].join(' ');
 
 const VARIANTS: Record<ButtonVariant, string> = {
@@ -26,7 +26,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
     '[backdrop-filter:var(--glass-filter)] hover:bg-glass-soft',
   ].join(' '),
   ghost: 'bg-transparent text-fg-body hover:bg-primary-soft active:bg-primary-soft-hover',
-  danger: 'bg-danger text-fg-on-brand shadow-sm hover:bg-coral-550 active:bg-coral-600',
+  danger: 'bg-danger text-fg-on-brand shadow-sm hover:bg-danger-hover active:bg-danger-pressed',
 };
 
 const SIZES: Record<ButtonSize, string> = {
@@ -47,7 +47,14 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const classes = [BASE, VARIANTS[variant], SIZES[size], fullWidth && 'w-full', className]
+  const classes = [
+    BASE,
+    VARIANTS[variant],
+    SIZES[size],
+    fullWidth && 'w-full',
+    disabled && !loading && 'opacity-40',
+    className,
+  ]
     .filter(Boolean)
     .join(' ');
 

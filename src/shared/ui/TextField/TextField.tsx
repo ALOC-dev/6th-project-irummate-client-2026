@@ -22,6 +22,7 @@ export function TextField({
   className,
   disabled,
   'aria-describedby': ariaDescribedBy,
+  'aria-invalid': ariaInvalid,
   ...props
 }: TextFieldProps) {
   const generatedId = useId();
@@ -62,7 +63,7 @@ export function TextField({
           id={inputId}
           className={inputClasses}
           disabled={disabled}
-          aria-invalid={errorMessage ? true : undefined}
+          aria-invalid={errorMessage ? true : ariaInvalid}
           aria-describedby={describedBy}
         />
         {trailing ? (

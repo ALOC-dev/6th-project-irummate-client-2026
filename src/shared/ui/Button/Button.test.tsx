@@ -21,5 +21,12 @@ describe('Button', () => {
     const button = screen.getByRole('button', { name: '처리 중' });
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute('aria-busy', 'true');
+    expect(button).not.toHaveClass('opacity-40');
+  });
+
+  it('disabled 상태에만 투명도를 적용한다', () => {
+    render(<Button disabled>저장</Button>);
+
+    expect(screen.getByRole('button', { name: '저장' })).toHaveClass('opacity-40');
   });
 });

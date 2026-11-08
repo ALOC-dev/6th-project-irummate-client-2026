@@ -20,4 +20,10 @@ describe('TextField', () => {
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(input).toHaveAccessibleDescription('학번을 확인해 주세요');
   });
+
+  it('오류 메시지가 없으면 외부 aria-invalid 값을 유지한다', () => {
+    render(<TextField label="이름" aria-invalid="spelling" />);
+
+    expect(screen.getByLabelText('이름')).toHaveAttribute('aria-invalid', 'spelling');
+  });
 });

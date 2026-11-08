@@ -18,13 +18,13 @@ const BASE = [
 ].join(' ');
 
 const VARIANTS: Record<IconButtonVariant, string> = {
-  primary: 'bg-primary text-fg-on-brand shadow-brand hover:bg-primary-hover',
+  primary: 'bg-primary text-fg-on-brand shadow-brand hover:bg-primary-hover active:bg-primary-pressed',
   glass: [
     'bg-surface-card text-fg-body shadow-sm ring-1 ring-inset ring-glass-edge',
     '[backdrop-filter:var(--glass-filter)] hover:bg-glass-soft',
   ].join(' '),
-  ghost: 'bg-transparent text-fg-body hover:bg-primary-soft',
-  danger: 'bg-danger-soft text-danger hover:bg-coral-100',
+  ghost: 'bg-transparent text-fg-body hover:bg-primary-soft active:bg-primary-soft-hover',
+  danger: 'bg-danger-soft text-danger hover:bg-danger-soft-hover',
 };
 
 const SIZES: Record<IconButtonSize, string> = {
