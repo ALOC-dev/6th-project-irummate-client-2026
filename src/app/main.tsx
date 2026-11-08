@@ -14,12 +14,20 @@ import { createRoutes } from './router/routes';
 // 통신 계층이 auth의 메모리 토큰에 닿는 유일한 연결
 registerAuthHandlers(authClientBindings);
 
-const router = createBrowserRouter(createRoutes(env.buildTarget));
-const queryClient = createQueryClient();
+// MSW는 VITE_ENABLE_MSW=true인 개발 빌드에서만, 앱을 그리기 전에 시작한다.
+// 동적 import라 운영 빌드에는 들어가지 않는다.
+async function startMocks(): Promise<void> {
+  if (!env.enableMocks) return;
+  const { startMockWorker } = await import('@test/msw/browser');
+  await startMockWorker();
+}
 
-const root = document.getElementById('root');
+function render(): void {
+  const root = document.getElementById('root');
+  if (!root) return;
 
-if (root) {
+  const router = createBrowserRouter(createRoutes(env.buildTarget));
+  const queryClient = createQueryClient();
   createRoot(root).render(
     <StrictMode>
       <AppProviders queryClient={queryClient}>
@@ -28,3 +36,5 @@ if (root) {
     </StrictMode>,
   );
 }
+
+void startMocks().then(render);
