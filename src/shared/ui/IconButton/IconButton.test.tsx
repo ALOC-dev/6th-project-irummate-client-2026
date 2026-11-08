@@ -9,4 +9,10 @@ describe('IconButton', () => {
 
     expect(screen.getByRole('button', { name: '알림 열기' })).toBeInTheDocument();
   });
+
+  it('danger 상태에 별도 hover 의미 토큰을 사용한다', () => {
+    render(<IconButton label="삭제" variant="danger">×</IconButton>);
+
+    expect(screen.getByRole('button', { name: '삭제' })).toHaveClass('hover:bg-danger-soft-hover');
+  });
 });
