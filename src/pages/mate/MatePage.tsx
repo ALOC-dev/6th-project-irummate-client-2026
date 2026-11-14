@@ -1,5 +1,5 @@
-import { ScreenPlaceholder } from '../ScreenPlaceholder';
+import { MateBoard } from '@features/mate-post';
 
 export default function MatePage() {
-  return <ScreenPlaceholder screenId="MT-01" name="매이트" />;
+  return <MateBoard />;
 }
