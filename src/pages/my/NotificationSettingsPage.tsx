@@ -1,5 +1,5 @@
-import { ScreenPlaceholder } from '../ScreenPlaceholder';
+import { NotificationSettingsView } from '@features/notification';
 
 export default function NotificationSettingsPage() {
-  return <ScreenPlaceholder screenId="MY-05" name="알림 설정" />;
+  return <NotificationSettingsView />;
 }
