@@ -1,5 +1,5 @@
-import { ScreenPlaceholder } from '../ScreenPlaceholder';
+import { DormHomeView } from '@features/dorm';
 
 export default function HomePage() {
-  return <ScreenPlaceholder screenId="HM-01" name="홈" />;
+  return <DormHomeView />;
 }
