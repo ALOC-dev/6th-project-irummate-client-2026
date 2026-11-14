@@ -1,5 +1,5 @@
-import { ScreenPlaceholder } from '../ScreenPlaceholder';
+import { ChatRoomView } from '@features/chat';
 
 export default function ChatRoomPage() {
-  return <ScreenPlaceholder screenId="CH-02" name="채팅방" />;
+  return <ChatRoomView />;
 }
