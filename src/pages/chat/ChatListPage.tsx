@@ -1,5 +1,5 @@
-import { ScreenPlaceholder } from '../ScreenPlaceholder';
+import { ChatListView } from '@features/chat';
 
 export default function ChatListPage() {
-  return <ScreenPlaceholder screenId="CH-01" name="채팅 목록" />;
+  return <ChatListView />;
 }
