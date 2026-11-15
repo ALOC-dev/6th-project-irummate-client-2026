@@ -26,5 +26,9 @@ jobs:
         run: npx vite build
       - name: Build (admin-web)
         run: npx vite build --mode admin-web --outDir dist-admin-web
+      - name: Build (MSW review preview)
+        run: VITE_ENABLE_MSW=true npx vite build --outDir dist-msw-preview
       - name: Check no MSW worker in builds
         run: test ! -f dist/mockServiceWorker.js && test ! -f dist-admin-web/mockServiceWorker.js
+      - name: Check MSW worker in review preview
+        run: test -f dist-msw-preview/mockServiceWorker.js
