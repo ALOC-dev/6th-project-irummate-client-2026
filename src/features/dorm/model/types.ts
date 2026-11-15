@@ -1,7 +1,7 @@
 export interface DormNotice {
   id: string;
-  category: '생활 안내' | '시설' | '안전' | '행사';
   title: string;
+  source: string;
   postedAt: string;
   isNew?: boolean;
 }
