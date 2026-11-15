@@ -19,7 +19,7 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <header className={[
-      'z-20 border-b border-border-subtle bg-glass-bar [backdrop-filter:var(--glass-filter)]',
+      'z-20 border-b border-border-subtle bg-glass-bar pt-[var(--safe-area-top)] [backdrop-filter:var(--glass-filter)]',
       sticky ? 'sticky top-0' : '',
     ].join(' ')}>
       <div className="mx-auto flex min-h-16 w-full max-w-[480px] items-center gap-2 px-3">

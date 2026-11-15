@@ -9,5 +9,6 @@ describe('PageHeader', () => {
     expect(screen.getByRole('heading', { name: '매이트' })).toBeInTheDocument();
     expect(screen.getByText('함께하면 더 즐거워요')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '알림' })).toBeInTheDocument();
+    expect(screen.getByRole('banner')).toHaveClass('pt-[var(--safe-area-top)]');
   });
 });

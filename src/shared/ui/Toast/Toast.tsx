@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 
 export interface ToastProps {
   open: boolean;
@@ -9,11 +9,17 @@ export interface ToastProps {
 }
 
 export function Toast({ open, children, onDismiss, duration = 2200, position = 'page' }: ToastProps) {
+  const onDismissRef = useRef(onDismiss);
+
   useEffect(() => {
-    if (!open || !onDismiss) return;
-    const timer = window.setTimeout(onDismiss, duration);
+    onDismissRef.current = onDismiss;
+  }, [onDismiss]);
+
+  useEffect(() => {
+    if (!open) return;
+    const timer = window.setTimeout(() => onDismissRef.current?.(), duration);
     return () => window.clearTimeout(timer);
-  }, [duration, onDismiss, open]);
+  }, [duration, open]);
 
   if (!open) return null;
 
