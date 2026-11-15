@@ -111,10 +111,10 @@ export function MateBoard() {
         eyebrow="함께하면 더 즐거워요"
         actions={(
           <>
-            <IconButton label="채팅 목록 열기" variant="ghost" onClick={() => navigate(paths.chats)}>
+            <IconButton label="채팅 목록 열기" variant="ghost" className="text-blue-450" onClick={() => navigate(paths.chats)}>
               <MateIcon name="chat" className="size-5" />
             </IconButton>
-            <IconButton label="알림 설정 열기" variant="ghost" onClick={() => navigate(paths.notificationSettings)}>
+            <IconButton label="알림 설정 열기" variant="ghost" className="text-blue-450" onClick={() => navigate(paths.notificationSettings)}>
               <MateIcon name="bell" className="size-5" />
             </IconButton>
           </>
