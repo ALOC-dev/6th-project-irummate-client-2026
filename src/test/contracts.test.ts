@@ -6,10 +6,16 @@ import { getAccessToken, useSession, type OnboardingStage, type SessionUser } fr
 import { apiClient, AppError, type AppErrorKind } from '@shared/api';
 import { externalBrowser, push, type Unsubscribe } from '@shared/platform';
 import {
+  BottomNav,
+  BottomSheet,
   Button,
+  EmptyState,
+  FilterChip,
   GlassCard,
   IconButton,
+  PageHeader,
   TextField,
+  Toast,
   type IconButtonProps,
   type TextFieldProps,
 } from '@shared/ui';
@@ -49,10 +55,16 @@ describe('계약', () => {
   });
 
   it('shared/ui', () => {
+    expectTypeOf(BottomNav).toBeFunction();
+    expectTypeOf(BottomSheet).toBeFunction();
     expectTypeOf(Button).toBeFunction();
+    expectTypeOf(EmptyState).toBeFunction();
+    expectTypeOf(FilterChip).toBeFunction();
     expectTypeOf(GlassCard).toBeFunction();
     expectTypeOf(IconButton).toBeFunction();
+    expectTypeOf(PageHeader).toBeFunction();
     expectTypeOf(TextField).toBeFunction();
+    expectTypeOf(Toast).toBeFunction();
     expectTypeOf<IconButtonProps['label']>().toBeString();
     expectTypeOf<TextFieldProps['label']>().toBeString();
   });
