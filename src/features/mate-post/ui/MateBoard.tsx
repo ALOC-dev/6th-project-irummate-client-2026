@@ -19,10 +19,6 @@ import { MateIcon } from './MateIcon';
 import { MatePostCard } from './MatePostCard';
 import { MatePostSheet } from './MatePostSheet';
 
-const categorySymbol: Record<MateCategoryFilter, string> = {
-  ALL: '✦', MEAL: '●', HOBBY: '◆', GROUP_BUY: '▣', OTHER: '•••',
-};
-
 export function MateBoard() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -129,7 +125,6 @@ export function MateBoard() {
               <FilterChip
                 key={item}
                 selected={category === item}
-                leading={categorySymbol[item]}
                 onClick={() => setCategory(item)}
               >
                 {mateCategoryLabels[item]}
