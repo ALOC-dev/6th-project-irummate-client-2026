@@ -5,6 +5,7 @@ import { paths } from '@app/router/paths';
 import { Button, EmptyState, FilterChip, IconButton, PageHeader, Toast } from '@shared/ui';
 
 import { matePostFixtures } from '../model/fixtures';
+import { compareDeadlineAt, isRecruitmentOpen } from '../model/recruitmentRules';
 import {
   mateCategories,
   mateCategoryLabels,
@@ -38,13 +39,13 @@ export function MateBoard() {
 
   const visiblePosts = useMemo(() => {
     const filtered = posts.filter((post) => {
+      if (!isRecruitmentOpen(post)) return false;
       if (category !== 'ALL' && post.category !== category) return false;
       if (bookmarkedOnly && !post.bookmarked) return false;
       return true;
     });
     if (sort === 'closing') {
-      return [...filtered].sort((a, b) =>
-        new Date(a.deadlineAt).getTime() - new Date(b.deadlineAt).getTime());
+      return [...filtered].sort(compareDeadlineAt);
     }
     return filtered;
   }, [bookmarkedOnly, category, posts, sort]);

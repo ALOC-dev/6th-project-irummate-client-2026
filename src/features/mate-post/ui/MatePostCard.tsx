@@ -2,6 +2,7 @@ import { GlassCard } from '@shared/ui';
 
 import { estimateFeePerPerson } from '../model/estimateFeePerPerson';
 import { formatCreatedAt, formatDateTime } from '../model/formatDateTime';
+import { remainingParticipants } from '../model/recruitmentRules';
 import { mateCategoryLabels, type MatePost } from '../model/types';
 import { MateIcon } from './MateIcon';
 
@@ -20,6 +21,7 @@ interface MatePostCardProps {
 
 export function MatePostCard({ post, onOpen, onBookmark }: MatePostCardProps) {
   const isFull = post.full || post.nowParticipants >= post.maxParticipants;
+  const hasOneSpotLeft = remainingParticipants(post) === 1;
   const feePerPerson = estimateFeePerPerson(post);
 
   return (
@@ -62,7 +64,9 @@ export function MatePostCard({ post, onOpen, onBookmark }: MatePostCardProps) {
             </div>
             <span className={[
               'inline-flex items-center gap-1 rounded-pill px-2.5 py-1 text-caption font-bold',
-              isFull ? 'bg-ink-100 text-fg-muted' : 'bg-primary-soft text-fg-brand',
+              isFull
+                ? 'bg-ink-100 text-fg-muted'
+                : hasOneSpotLeft ? 'bg-danger-soft text-danger' : 'bg-primary-soft text-fg-brand',
             ].join(' ')}>
               <MateIcon name="people" className="size-3.5" />
               {post.nowParticipants}/{post.maxParticipants}명
