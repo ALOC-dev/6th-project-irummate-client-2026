@@ -6,7 +6,6 @@
 ## 현재 상태
 
 - 0단계 진행 중. 설정 파일(TypeScript strict, Vite, ESLint 계층 규칙, Vitest, Playwright, Capacitor, CI)은 옮겼다. 결정 기록은 `docs/adr/0001-stage0-skeleton.md`.
-- iaruok 영역의 옛 JavaScript 뼈대는 지웠다. uukdo 영역의 옛 `.js`/`.jsx`(`features/chat`, `features/mate-post`, `shared/ui`, `shared/lib`, `pages/HomePage.jsx`, `app/socket`)는 uukdo가 정리할 때까지 남아 있으며, lint·typecheck·빌드 대상이 아니다. 새 규칙의 예시로 삼지 않는다.
 
 ## 스택
 
@@ -69,11 +68,13 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 - **강현(iaruok)** (계정·룸메이트·관리자)
   - feature: `auth`, `terms`, `profile`, `verification`, `roommate`, `admin`
   - 공통 계층: `app`(`ChatSocketProvider` 제외), `shared/api`, `shared/platform`, `shared/config`
+  - 페이지: `pages/onboarding`, `pages/match`, `pages/my`(`NotificationSettingsPage.tsx` 제외), `pages/admin`
 - **지원(uukdo)** (디자인 시스템·커뮤니티)
   - feature: `dorm`, `mate-post`, `chat`, `notification`
   - 공통 계층: `shared/styles`, `shared/ui`, `shared/lib`, `shared/assets`, `app/providers/ChatSocketProvider.tsx`
+  - 페이지: `pages/home`, `pages/mate`, `pages/chat`, `pages/my/NotificationSettingsPage.tsx`
 - 계약 파일은 바꿀 때 상대의 리뷰가 필요하다: `app/router/paths.ts`, `features/auth/index.ts`, `shared/api/index.ts`, `shared/platform/index.ts`, `shared/ui/index.ts`, `package.json`
-- 계약을 바꿀 때는 선택 필드만 추가한다. 기존 이름은 바꾸지 않는다.
+- 계약을 바꿀 때는 선택 필드만 추가하는 것을 기본으로 한다. 기존 이름은 바꾸지 않는다. 호환이 깨지는 변경이 불가피하면 구현 전에 상대와 합의하고, PR에 영향 범위와 마이그레이션 방안을 적는다.
 - 상대가 소유한 폴더는 고치지 않는다. 필요하면 PR 설명에 요청을 적는다.
 
 ## 공통 UI
@@ -133,7 +134,7 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 
 - 공통 계약 및 아키텍처 변경은 **구현 전에 상대 개발자와 합의**한다.
 - 상대 개발자의 소유 영역을 수정해야 할 경우 사전에 협의한다.
-- Breaking Change는 영향 범위와 마이그레이션 방안을 PR에 명시한다.
+- Breaking Change는 위 계약 규칙에 따라 상대와 합의한 뒤에만 진행하고, 영향 범위와 마이그레이션 방안을 PR에 명시한다.
 - 검토자가 Blocking Comment를 남기면 해결 및 재확인 전까지 병합하지 않는다.
 - 구조적 의사결정은 `docs/adr/`에 기록한다.
 
