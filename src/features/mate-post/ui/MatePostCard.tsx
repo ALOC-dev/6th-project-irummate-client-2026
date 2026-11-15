@@ -1,13 +1,15 @@
 import { GlassCard } from '@shared/ui';
 
-import type { MatePost } from '../model/types';
+import { estimateFeePerPerson } from '../model/estimateFeePerPerson';
+import { formatCreatedAt, formatDateTime } from '../model/formatDateTime';
+import { mateCategoryLabels, type MatePost } from '../model/types';
 import { MateIcon } from './MateIcon';
 
 const categoryTone: Record<MatePost['category'], string> = {
-  밥: 'bg-warning-soft text-warning',
-  취미: 'bg-info-soft text-info',
-  공동구매: 'bg-success-soft text-success',
-  기타: 'bg-ink-100 text-fg-muted',
+  MEAL: 'bg-warning-soft text-warning',
+  HOBBY: 'bg-info-soft text-info',
+  GROUP_BUY: 'bg-success-soft text-success',
+  OTHER: 'bg-ink-100 text-fg-muted',
 };
 
 interface MatePostCardProps {
@@ -17,10 +19,8 @@ interface MatePostCardProps {
 }
 
 export function MatePostCard({ post, onOpen, onBookmark }: MatePostCardProps) {
-  const isFull = post.currentMembers >= post.maxMembers;
-  const pricePerPerson = post.priceMode === 'split' && post.price
-    ? Math.ceil(post.price / (post.currentMembers + 1))
-    : post.price;
+  const isFull = post.full || post.nowParticipants >= post.maxParticipants;
+  const feePerPerson = estimateFeePerPerson(post);
 
   return (
     <GlassCard padding="none" className={isFull ? 'opacity-60' : undefined}>
@@ -28,9 +28,9 @@ export function MatePostCard({ post, onOpen, onBookmark }: MatePostCardProps) {
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
             <span className={['rounded-pill px-2.5 py-1 text-caption font-bold', categoryTone[post.category]].join(' ')}>
-              {post.category}
+              {mateCategoryLabels[post.category]}
             </span>
-            <span className="truncate text-caption text-fg-subtle">{post.createdAtLabel}</span>
+            <span className="truncate text-caption text-fg-subtle">{formatCreatedAt(post.createdAt)}</span>
           </div>
           <button
             type="button"
@@ -53,19 +53,19 @@ export function MatePostCard({ post, onOpen, onBookmark }: MatePostCardProps) {
           </h3>
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-body-sm text-fg-muted">
             {post.place ? <span className="inline-flex items-center gap-1.5"><MateIcon name="map" className="size-4" />{post.place}</span> : null}
-            <span className="inline-flex items-center gap-1.5"><MateIcon name="clock" className="size-4" />{post.schedule}</span>
+            <span className="inline-flex items-center gap-1.5"><MateIcon name="clock" className="size-4" />{formatDateTime(post.activityAt)}</span>
           </div>
           <div className="mt-4 flex items-end justify-between gap-3 border-t border-border-subtle pt-4">
             <div>
-              <p className="text-caption text-fg-subtle">{post.host}님의 모집</p>
-              {pricePerPerson ? <p className="mt-0.5 text-body-sm font-bold text-fg-strong">1인 {pricePerPerson.toLocaleString('ko-KR')}원 예상</p> : null}
+              <p className="text-caption text-fg-subtle">{post.authorNickname}님의 모집</p>
+              {feePerPerson !== undefined ? <p className="mt-0.5 text-body-sm font-bold text-fg-strong">1인 {feePerPerson.toLocaleString('ko-KR')}원 예상</p> : null}
             </div>
             <span className={[
               'inline-flex items-center gap-1 rounded-pill px-2.5 py-1 text-caption font-bold',
               isFull ? 'bg-ink-100 text-fg-muted' : 'bg-primary-soft text-fg-brand',
             ].join(' ')}>
               <MateIcon name="people" className="size-3.5" />
-              {post.currentMembers}/{post.maxMembers}명
+              {post.nowParticipants}/{post.maxParticipants}명
             </span>
           </div>
         </button>

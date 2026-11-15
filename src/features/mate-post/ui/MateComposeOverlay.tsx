@@ -2,17 +2,28 @@ import { useEffect, useState, type FormEvent } from 'react';
 
 import { Button, FilterChip, TextField } from '@shared/ui';
 
-import { mateCategories, type MateCategory, type MatePostDraft } from '../model/types';
+import {
+  mateCategories,
+  mateCategoryLabels,
+  type MateCategory,
+  type MatePostDraft,
+} from '../model/types';
 
 const INITIAL_DRAFT: MatePostDraft = {
-  category: '밥',
+  category: 'MEAL',
   title: '',
+  content: '',
   place: '',
-  schedule: '',
-  maxMembers: 2,
-  price: '',
-  priceMode: 'fixed',
+  activityAt: '',
+  deadlineAt: '',
+  maxParticipants: 1,
+  estimatedFee: '',
 };
+
+function toLocalDateTimeInputValue(date: Date) {
+  const localTime = date.getTime() - date.getTimezoneOffset() * 60 * 1000;
+  return new Date(localTime).toISOString().slice(0, 16);
+}
 
 interface MateComposeOverlayProps {
   open: boolean;
@@ -22,9 +33,20 @@ interface MateComposeOverlayProps {
 
 export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverlayProps) {
   const [draft, setDraft] = useState(INITIAL_DRAFT);
-  const categories = mateCategories.filter((category): category is MateCategory => category !== '전체');
-  const isPurchase = draft.category === '공동구매';
-  const valid = draft.title.trim() && draft.schedule.trim() && (isPurchase || draft.place.trim());
+  const categories = mateCategories.filter((category): category is MateCategory => category !== 'ALL');
+  const isPurchase = draft.category === 'GROUP_BUY';
+  const activityAt = new Date(draft.activityAt).getTime();
+  const deadlineAt = new Date(draft.deadlineAt).getTime();
+  const minimumDateTime = toLocalDateTimeInputValue(new Date());
+  const valid = Boolean(
+    draft.title.trim()
+    && draft.activityAt
+    && draft.deadlineAt
+    && activityAt > Date.now()
+    && deadlineAt > Date.now()
+    && deadlineAt < activityAt
+    && (isPurchase || draft.place.trim()),
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -67,7 +89,7 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
                   selected={draft.category === category}
                   onClick={() => setDraft((current) => ({ ...current, category }))}
                 >
-                  {category}
+                  {mateCategoryLabels[category]}
                 </FilterChip>
               ))}
             </div>
@@ -81,6 +103,14 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
               value={draft.title}
               onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
             />
+            <TextField
+              label="모집 내용"
+              placeholder="함께할 활동이나 참여 조건을 알려 주세요"
+              maxLength={80}
+              value={draft.content}
+              onChange={(event) => setDraft((current) => ({ ...current, content: event.target.value }))}
+              helperText={`${draft.content.length}/80자`}
+            />
             {!isPurchase ? (
               <TextField
                 label="만날 장소"
@@ -90,18 +120,29 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
               />
             ) : null}
             <TextField
-              label={isPurchase ? '모집 마감' : '만날 시간'}
-              placeholder="예: 금요일 오후 7:00"
-              value={draft.schedule}
-              onChange={(event) => setDraft((current) => ({ ...current, schedule: event.target.value }))}
+              label={isPurchase ? '수령·나눔 일시' : '활동 일시'}
+              type="datetime-local"
+              min={minimumDateTime}
+              value={draft.activityAt}
+              onChange={(event) => setDraft((current) => ({ ...current, activityAt: event.target.value }))}
+            />
+            <TextField
+              label="모집 마감 일시"
+              type="datetime-local"
+              min={minimumDateTime}
+              value={draft.deadlineAt}
+              onChange={(event) => setDraft((current) => ({ ...current, deadlineAt: event.target.value }))}
+              errorMessage={draft.activityAt && draft.deadlineAt && deadlineAt >= activityAt
+                ? '모집 마감은 활동 일시보다 빨라야 해요.'
+                : undefined}
             />
             {isPurchase ? (
               <TextField
-                label="총 금액"
+                label="예상 비용"
                 inputMode="numeric"
-                placeholder="총 금액을 입력해 주세요"
-                value={draft.price}
-                onChange={(event) => setDraft((current) => ({ ...current, price: event.target.value.replace(/\D/g, '').slice(0, 8) }))}
+                placeholder="예상 비용을 입력해 주세요"
+                value={draft.estimatedFee}
+                onChange={(event) => setDraft((current) => ({ ...current, estimatedFee: event.target.value.replace(/\D/g, '').slice(0, 8) }))}
                 helperText="참여 인원에 따라 1인 예상 금액을 계산해 드려요."
               />
             ) : null}
@@ -113,17 +154,17 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
               <button
                 type="button"
                 className="size-11 rounded-pill bg-surface-card text-title-2 text-fg-body shadow-xs disabled:opacity-40"
-                disabled={draft.maxMembers <= 2}
+                disabled={draft.maxParticipants <= 1}
                 aria-label="인원 줄이기"
-                onClick={() => setDraft((current) => ({ ...current, maxMembers: current.maxMembers - 1 }))}
+                onClick={() => setDraft((current) => ({ ...current, maxParticipants: current.maxParticipants - 1 }))}
               >−</button>
-              <strong className="text-title-3 text-fg-strong">나 포함 {draft.maxMembers}명</strong>
+              <strong className="text-title-3 text-fg-strong">추가 {draft.maxParticipants}명</strong>
               <button
                 type="button"
                 className="size-11 rounded-pill bg-surface-card text-title-2 text-fg-body shadow-xs disabled:opacity-40"
-                disabled={draft.maxMembers >= 20}
+                disabled={draft.maxParticipants >= 19}
                 aria-label="인원 늘리기"
-                onClick={() => setDraft((current) => ({ ...current, maxMembers: current.maxMembers + 1 }))}
+                onClick={() => setDraft((current) => ({ ...current, maxParticipants: current.maxParticipants + 1 }))}
               >+</button>
             </div>
           </fieldset>
