@@ -42,4 +42,14 @@ describe('MateBoard', () => {
     expect(screen.getByRole('dialog', { name: '밥' })).toBeInTheDocument();
     expect(screen.getByText('저녁에 가볍게 걸어요.')).toBeInTheDocument();
   });
+
+  it('작성을 취소하면 입력한 초안을 초기화한다', async () => {
+    const user = userEvent.setup();
+    renderBoard();
+    await user.click(screen.getByRole('button', { name: /모집하기/ }));
+    await user.type(screen.getByLabelText('모집 제목'), '남으면 안 되는 제목');
+    await user.click(screen.getByRole('button', { name: '취소' }));
+    await user.click(screen.getByRole('button', { name: /모집하기/ }));
+    expect(screen.getByLabelText('모집 제목')).toHaveValue('');
+  });
 });

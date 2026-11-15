@@ -64,6 +64,11 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
     setDraft(INITIAL_DRAFT);
   };
 
+  const cancel = () => {
+    setDraft(INITIAL_DRAFT);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto [background:var(--app-background)]">
       <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col px-5 pb-[calc(1.25rem+var(--safe-area-bottom))] pt-[var(--safe-area-top)]">
@@ -71,7 +76,7 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
           <button
             type="button"
             className="flex h-11 items-center rounded-pill px-2 text-body-sm font-semibold text-fg-body focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
-            onClick={onClose}
+            onClick={cancel}
           >
             취소
           </button>
