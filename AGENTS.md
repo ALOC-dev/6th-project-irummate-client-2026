@@ -6,6 +6,7 @@
 ## 현재 상태
 
 - 0단계 진행 중. 설정 파일(TypeScript strict, Vite, ESLint 계층 규칙, Vitest, Playwright, Capacitor, CI)은 옮겼다. 결정 기록은 `docs/adr/0001-stage0-skeleton.md`.
+- `android/`를 만들었다(앱 ID `com.irummate.app`, 네이티브 HTTP 켬). `ios/`는 uukdo가 Mac에서 만든다. 결정 기록은 `docs/adr/0002-native-projects.md`.
 
 ## 스택
 
@@ -20,7 +21,8 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 - 빌드 대상 값은 `app` 또는 `admin-web`이다. `shared/config/env.ts`에서만 읽는다.
 - 앱 출시(Google Play·App Store)는 관리자 화면까지 모두 만든 뒤다.
 - Android와 iOS는 같은 코드로 동작한다. 두 플랫폼의 차이(뒤로가기, 화면 가장자리, 키보드, 딥링크, 보안 저장소, 권한 안내 문구)는 \shared/platform과 각 네이티브 프로젝트 설정에서만 다룬다.
-- iOS 빌드·서명은 macOS(Xcode)에서만 된다. iOS 빌드 환경과 iOS 로그인 방식(App Store 심사 지침 4.8)은 결정 항목이다. 정해지기 전에는 추측해서 만들지 않는다.
+- iOS 빌드·서명은 macOS(Xcode)에서만 된다. 빌드 환경은 uukdo의 Mac과 소모임의 Apple Developer 계정이다(ADR 0002).
+- iOS 로그인 방식(App Store 심사 지침 4.8)은 결정 항목이다. 정해지기 전에는 추측해서 만들지 않는다.
 
 ## 계층 규칙 (ESLint로 강제)
 
@@ -73,6 +75,7 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
   - feature: `dorm`, `mate-post`, `chat`, `notification`
   - 공통 계층: `shared/styles`, `shared/ui`, `shared/lib`, `shared/assets`, `app/providers/ChatSocketProvider.tsx`
   - 페이지: `pages/home`, `pages/mate`, `pages/chat`, `pages/my/NotificationSettingsPage.tsx`
+- 네이티브 프로젝트(`android/`, `ios/`)와 `capacitor.config.ts`는 공동 담당이다. iOS의 플랫폼 코드(`shared/platform`)는 iaruok가 쓰고, `ios/` 생성·Xcode 설정·iOS 실기기 시험은 Mac을 쓰는 uukdo가 맡는다.
 - 계약 파일은 바꿀 때 상대의 리뷰가 필요하다: `app/router/paths.ts`, `features/auth/index.ts`, `shared/api/index.ts`, `shared/platform/index.ts`, `shared/ui/index.ts`, `package.json`
 - 계약을 바꿀 때는 선택 필드만 추가하는 것을 기본으로 한다. 기존 이름은 바꾸지 않는다. 호환이 깨지는 변경이 불가피하면 구현 전에 상대와 합의하고, PR에 영향 범위와 마이그레이션 방안을 적는다.
 - 상대가 소유한 폴더는 고치지 않는다. 필요하면 PR 설명에 요청을 적는다.
@@ -108,6 +111,8 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 - `npm test`: Vitest
 - `npm run test:e2e`: Playwright (개발 서버 + MSW)
 - `npm run gen:api`: 백엔드 OpenAPI → `src/shared/api/generated/schema.d.ts` (`OPENAPI_URL` 필요)
+- `npx cap sync android`: `npm run build` 결과와 플러그인을 `android/`에 반영 (웹 코드나 `capacitor.config.ts`를 바꾼 뒤 실행)
+- `npx cap open android`: Android Studio에서 `android/` 열기
 
 ## PR 검토 및 병합 규칙
 
