@@ -1,4 +1,4 @@
-package com.getcapacitor.myapp;
+package com.irummate.app;
 
 import static org.junit.Assert.*;
 
