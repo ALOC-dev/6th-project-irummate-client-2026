@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { paths } from '@app/router/paths';
-import { GlassCard, IconButton } from '@shared/ui';
+import { EmptyState, FilterChip, GlassCard, IconButton } from '@shared/ui';
 
 import { chatRoomFixtures } from '../model/fixtures';
 import type { ChatCategory } from '../model/types';
@@ -42,21 +42,19 @@ export function ChatListView() {
       </header>
 
       <div className="mx-auto w-full max-w-[480px] px-5 py-5">
-        <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2 [scrollbar-width:none]" aria-label="채팅 유형">
+        <div
+          className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2 [scrollbar-width:none]"
+          role="group"
+          aria-label="채팅 유형"
+        >
           {filters.map((item) => (
-            <button
+            <FilterChip
               key={item.key}
-              type="button"
-              className={[
-                'h-10 shrink-0 rounded-pill px-4 text-body-sm font-semibold transition-[background-color,box-shadow,transform]',
-                'focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)] active:scale-[var(--press-scale)]',
-                filter === item.key ? 'bg-primary text-fg-on-brand shadow-brand' : 'bg-surface-card text-fg-body shadow-xs ring-1 ring-inset ring-glass-edge',
-              ].join(' ')}
-              aria-pressed={filter === item.key}
+              selected={filter === item.key}
               onClick={() => setFilter(item.key)}
             >
               {item.label}
-            </button>
+            </FilterChip>
           ))}
         </div>
 
@@ -88,10 +86,12 @@ export function ChatListView() {
             </ul>
           </GlassCard>
         ) : (
-          <GlassCard className="mt-4 flex min-h-56 flex-col items-center justify-center text-center">
-            <span className="flex size-14 items-center justify-center rounded-pill bg-primary-soft text-fg-brand"><ChatIcon name="chat" className="size-6" /></span>
-            <h2 className="mt-4 text-title-3 font-bold text-fg-strong">아직 채팅이 없어요</h2>
-            <p className="mt-2 max-w-64 text-body-sm leading-6 text-fg-muted">매칭되거나 매이트 모집에 참여하면 채팅이 시작돼요.</p>
+          <GlassCard padding="none" className="mt-4">
+            <EmptyState
+              icon={<ChatIcon name="chat" className="size-6" />}
+              title="아직 채팅이 없어요"
+              description="매칭되거나 매이트 모집에 참여하면 채팅이 시작돼요."
+            />
           </GlassCard>
         )}
       </div>
