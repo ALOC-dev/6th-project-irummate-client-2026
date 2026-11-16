@@ -12,3 +12,6 @@ dist-admin-web
 coverage
 playwright-report
 test-results
+
+# Android Studio 개인 설정
+android/.idea/
