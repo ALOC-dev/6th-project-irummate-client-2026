@@ -30,4 +30,16 @@ describe('ChatRoomView', () => {
     expect(screen.getByText('내일 이야기해요')).toBeInTheDocument();
     expect(screen.getByLabelText('메시지')).toHaveValue('');
   });
+
+  it('없는 채팅방은 안내하고 임의의 방을 열지 않는다', () => {
+    render(
+      <MemoryRouter initialEntries={['/chats/missing-room']}>
+        <Routes><Route path={routePatterns.chatRoom} element={<ChatRoomView />} /></Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('heading', { name: '채팅방을 찾을 수 없어요' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '채팅 목록으로' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: '새봄' })).not.toBeInTheDocument();
+  });
 });

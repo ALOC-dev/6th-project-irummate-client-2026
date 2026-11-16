@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
 
 import { paths } from '@app/router/paths';
-import { IconButton } from '@shared/ui';
+import { Button, EmptyState, IconButton } from '@shared/ui';
 
 import { chatMessageFixtures, chatRoomFixtures } from '../model/fixtures';
 import type { ChatMessage } from '../model/types';
@@ -13,11 +13,22 @@ export function ChatRoomView() {
   const { roomId = '' } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const room = chatRoomFixtures.find((item) => item.id === roomId) ?? chatRoomFixtures[0];
+  const room = chatRoomFixtures.find((item) => item.id === roomId);
   const [messages, setMessages] = useState(() => chatMessageFixtures.filter((message) => message.roomId === room?.id));
   const [draft, setDraft] = useState('');
 
-  if (!room) return null;
+  if (!room) {
+    return (
+      <main className="flex min-h-dvh items-center justify-center px-5 pt-[var(--safe-area-top)]">
+        <h2 className="sr-only">CH-02 채팅방</h2>
+        <EmptyState
+          title="채팅방을 찾을 수 없어요"
+          description="삭제되었거나 참여할 수 없는 채팅방이에요."
+          action={<Button onClick={() => navigate(paths.chats, { replace: true })}>채팅 목록으로</Button>}
+        />
+      </main>
+    );
+  }
 
   const goBack = () => {
     const pushedFromList = Boolean((location.state as { chatStack?: boolean } | null)?.chatStack);

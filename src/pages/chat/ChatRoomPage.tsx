@@ -1,5 +1,7 @@
 import { ChatRoomView } from '@features/chat';
+import { useParams } from 'react-router';
 
 export default function ChatRoomPage() {
-  return <ChatRoomView />;
+  const { roomId = '' } = useParams();
+  return <ChatRoomView key={roomId} />;
 }
