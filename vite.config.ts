@@ -6,8 +6,8 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-// MSW 워커(public/mockServiceWorker.js)는 개발 서버에서만 쓴다.
-// Vite는 public/을 빌드 폴더에 그대로 복사하므로, 빌드가 끝나면 이 파일만 지운다.
+// MSW 워커(public/mockServiceWorker.js)는 로컬 개발과 명시적으로 켠 검수용 빌드에서만 쓴다.
+// Vite는 public/을 빌드 폴더에 그대로 복사하므로, 일반 빌드가 끝나면 이 파일만 지운다.
 function dropMswWorker(): Plugin {
   let outDir = '';
   return {
@@ -28,10 +28,18 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const buildTarget = mode === 'admin-web' ? 'admin-web' : 'app';
   const proxyTarget = env.VITE_API_PROXY_TARGET;
+  const enableMsw = env.VITE_ENABLE_MSW === 'true';
 
   return {
-    plugins: [react(), tailwindcss(), tsconfigPaths(), dropMswWorker()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      tsconfigPaths(),
+      ...(enableMsw ? [] : [dropMswWorker()]),
+    ],
     define: {
+      // env.ts의 개발 전용 안전장치는 유지하되, 검수용 빌드만 명시적으로 개발 환경처럼 취급한다.
+      ...(enableMsw ? { 'import.meta.env.DEV': JSON.stringify(true) } : {}),
       'import.meta.env.VITE_BUILD_TARGET': JSON.stringify(buildTarget),
     },
     server: {
