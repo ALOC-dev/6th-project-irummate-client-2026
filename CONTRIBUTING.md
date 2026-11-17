@@ -4,7 +4,7 @@
 
 ## 브랜치
 
-- 기능 단위로 만듭니다. 예: `feat/auth-token-storage`, `chore/stage0-config`
+- 기능 단위로 만듭니다. 예: `feat/auth-token-storage`, `chore/stage1-config`
 - 하루 한 번 이상 main 기준으로 rebase합니다.
 
 ## PR
