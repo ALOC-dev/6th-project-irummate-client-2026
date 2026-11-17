@@ -5,8 +5,9 @@
 
 ## 현재 상태
 
-- 0단계 진행 중. 설정 파일(TypeScript strict, Vite, ESLint 계층 규칙, Vitest, Playwright, Capacitor, CI)은 옮겼다. 결정 기록은 `docs/adr/0001-stage0-skeleton.md`.
+- 1단계(계약·뼈대)를 마쳤고 2단계(기반)를 시작하기 전이다. 설정 파일(TypeScript strict, Vite, ESLint 계층 규칙, Vitest, Playwright, Capacitor, CI)은 옮겼다. 결정 기록은 `docs/adr/0001-stage1-skeleton.md`.
 - `android/`를 만들었다(앱 ID `com.irummate.app`, 네이티브 HTTP 켬). `ios/`는 uukdo가 Mac에서 만든다. 결정 기록은 `docs/adr/0002-native-projects.md`.
+- 단계 번호는 1부터 시작한다: 1 계약·뼈대, 2 기반, 3 가입 흐름·MY, 4 룸메이트, 5 통합·검증, 6 관리자. ADR 번호는 결정이 생긴 순번이며 단계 번호와 무관하다. 각 ADR 머리말의 `단계` 줄이 관련 단계를 가리킨다.
 
 ## 스택
 
