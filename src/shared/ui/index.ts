@@ -19,4 +19,6 @@ export type { EmptyStateProps } from './EmptyState/EmptyState';
 export { FilterChip } from './FilterChip/FilterChip';
 export type { FilterChipProps } from './FilterChip/FilterChip';
 export { Avatar } from './Avatar/Avatar';
-export type { AvatarProps } from './Avatar/Avatar';
+export type { AvatarProps, AvatarTone } from './Avatar/Avatar';
+export { BrandIcon } from './BrandIcon/BrandIcon';
+export type { BrandIconName, BrandIconProps } from './BrandIcon/BrandIcon';

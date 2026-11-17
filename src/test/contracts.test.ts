@@ -7,6 +7,7 @@ import { apiClient, AppError, type AppErrorKind } from '@shared/api';
 import { externalBrowser, push, type Unsubscribe } from '@shared/platform';
 import {
   Avatar,
+  BrandIcon,
   BottomNav,
   BottomSheet,
   Button,
@@ -62,6 +63,7 @@ describe('계약', () => {
     expectTypeOf(EmptyState).toBeFunction();
     expectTypeOf(FilterChip).toBeFunction();
     expectTypeOf(Avatar).toBeFunction();
+    expectTypeOf(BrandIcon).toBeFunction();
     expectTypeOf(GlassCard).toBeFunction();
     expectTypeOf(IconButton).toBeFunction();
     expectTypeOf(PageHeader).toBeFunction();
