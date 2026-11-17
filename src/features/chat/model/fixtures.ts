@@ -1,12 +1,15 @@
 import type { ChatMessage, ChatRoomSummary } from './types';
 
+// 가짜 사용자 번호. 실제로는 서버의 사용자 ID가 들어온다.
+const PEOPLE: Record<string, number> = { 지아: 1, 태린: 2, 민지: 3, 도윤: 4, 수아: 5, Sora: 6, 하늘: 7 };
+
 export const chatRoomFixtures: ChatRoomSummary[] = [
   { id: 'bot', name: '이룸봇', category: 'bot', icon: 'bot', pinned: true, subtitle: '챗봇 · 24시간 자동 답변', lastAt: '', unread: 0 },
-  { id: 'room-jia', name: '지아', category: 'match', subtitle: '매칭 성사 · 생활 궁합 88%', lastAt: '방금', unread: 2 },
+  { id: 'room-jia', name: '지아', category: 'match', peerId: PEOPLE['지아'], subtitle: '매칭 성사 · 생활 궁합 88%', lastAt: '방금', unread: 2 },
   { id: 'room-dinner', name: '오늘 저녁 학식 같이 드실 분', category: 'mate', icon: 'utensils', group: true, subtitle: '밥 메이트 · 3명 참여', lastAt: '10분 전', unread: 2 },
   { id: 'room-office', name: '생활관 행정실', category: 'admin', icon: 'building', subtitle: '운영 · 평일 09:00–18:00 답변', lastAt: '1시간 전', unread: 1 },
   { id: 'room-water', name: '생수 2L 24병 나눠 사요', category: 'mate', icon: 'dollar', group: true, subtitle: '공동구매 · 5명 참여', lastAt: '어제', unread: 0 },
-  { id: 'room-taerin', name: '태린', category: 'match', subtitle: '매칭 성사 · 생활 궁합 83%', lastAt: '어제', unread: 0 },
+  { id: 'room-taerin', name: '태린', category: 'match', peerId: PEOPLE['태린'], subtitle: '매칭 성사 · 생활 궁합 83%', lastAt: '어제', unread: 0 },
   { id: 'room-team', name: '이룸매이트 운영팀', category: 'admin', icon: 'shield', subtitle: '운영 · 신고 및 문의', lastAt: '3일 전', unread: 0 },
 ];
 
@@ -42,6 +45,7 @@ export const chatMessageFixtures: ChatMessage[] = lines.map(([roomId, from, text
   text,
   sentAt,
   ...(from ? { from } : {}),
+  ...(from && PEOPLE[from] !== undefined ? { fromId: PEOPLE[from] } : {}),
 }));
 
 export function previewOf(room: ChatRoomSummary, messages: ChatMessage[] = chatMessageFixtures): string {

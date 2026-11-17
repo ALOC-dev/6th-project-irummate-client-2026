@@ -2,17 +2,16 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
 
 import { paths } from '@app/router/paths';
-import { Avatar, Button, EmptyState } from '@shared/ui';
+import { Avatar, Button, EmptyState, IconButton, PageHeader } from '@shared/ui';
 
 import { botReply } from '../model/botReply';
 import { chatMessageFixtures, chatRoomFixtures } from '../model/fixtures';
 import type { ChatMessage } from '../model/types';
 import { ChatAvatar } from './ChatAvatar';
-import { chatCategoryStyle } from './chatCategoryStyle';
+import { chatTone } from './chatCategoryStyle';
 import { ChatIcon } from './ChatIcon';
 
 const BOT_DELAY_MS = 700;
-const ICON_BUTTON = 'inline-flex size-11 shrink-0 items-center justify-center rounded-pill text-fg-strong hover:bg-primary-soft focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]';
 
 function dayLabel(date: Date) {
   return `${date.getMonth() + 1}월 ${date.getDate()}일 ${'일월화수목금토'[date.getDay()]}요일`;
@@ -51,7 +50,6 @@ export function ChatRoomView({ today = new Date() }: ChatRoomViewProps) {
     );
   }
 
-  const style = chatCategoryStyle[room.category];
   const showNames = Boolean(room.group) || room.category === 'admin' || room.category === 'bot';
 
   const goBack = () => {
@@ -79,28 +77,26 @@ export function ChatRoomView({ today = new Date() }: ChatRoomViewProps) {
   };
 
   return (
-    <main className="flex min-h-dvh flex-col pt-[var(--safe-area-top)]">
+    <main className="flex min-h-dvh flex-col">
       <h2 className="sr-only">CH-02 채팅방</h2>
-      <header className="sticky top-0 z-20 bg-glass-bar shadow-[inset_0_-1px_0_var(--color-glass-edge)] [backdrop-filter:var(--glass-filter)]">
-        <div className="mx-auto flex w-full max-w-[480px] items-center gap-2 px-2 pb-3 pt-2.5">
-          <button type="button" aria-label="뒤로" className={ICON_BUTTON} onClick={goBack}>
-            <ChatIcon name="arrow-left" className="size-6" />
-          </button>
-          <ChatAvatar room={room} size="sm" />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
-              <h1 className="m-0 min-w-0 truncate text-[16px] font-bold tracking-irum-tight text-fg-strong">{room.name}</h1>
-              <span className={['inline-flex h-[22px] shrink-0 items-center rounded-pill px-2 text-micro font-bold ring-1 ring-inset', style.badge].join(' ')}>
-                {style.label}
-              </span>
-            </div>
-            <p className="m-0 mt-0.5 truncate text-caption text-fg-muted">{room.subtitle}</p>
-          </div>
-          <button type="button" aria-label="더보기" className={ICON_BUTTON}>
-            <ChatIcon name="more" className="size-6" />
-          </button>
-        </div>
-      </header>
+      <PageHeader
+        titleSize="compact"
+        leading={(
+          <>
+            <IconButton label="뒤로" variant="ghost" size="sm" onClick={goBack}>
+              <ChatIcon name="arrow-left" className="size-6 text-fg-strong" />
+            </IconButton>
+            <ChatAvatar room={room} size="sm" />
+          </>
+        )}
+        title={room.name}
+        subtitle={room.subtitle}
+        actions={(
+          <IconButton label="더보기" variant="ghost" size="sm">
+            <ChatIcon name="more" className="size-6 text-fg-strong" />
+          </IconButton>
+        )}
+      />
 
       <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col gap-1 px-4 pb-3 pt-4" aria-live="polite">
         <p className="m-0 mb-2.5 self-center rounded-pill bg-glass-soft px-2.5 py-1 text-micro font-semibold text-fg-subtle ring-1 ring-inset ring-glass-edge">
@@ -119,7 +115,7 @@ export function ChatRoomView({ today = new Date() }: ChatRoomViewProps) {
             return (
               <div key={message.id} className={['flex items-end justify-end gap-1.5', gap].join(' ')}>
                 <span className="shrink-0 text-[10px] text-fg-subtle">{message.sentAt}</span>
-                <p className={['m-0 max-w-[72%] break-keep rounded-[20px] rounded-tr-[6px] px-[15px] py-2.5 text-body leading-[22px] text-fg-strong shadow-xs ring-1 ring-inset', style.bubble].join(' ')}>
+                <p className={['m-0 max-w-[72%] break-keep rounded-[20px] rounded-tr-[6px] px-[15px] py-2.5 text-body leading-[22px] text-fg-strong shadow-xs ring-1 ring-inset', chatTone.bubble].join(' ')}>
                   {message.text}
                 </p>
               </div>
@@ -128,7 +124,7 @@ export function ChatRoomView({ today = new Date() }: ChatRoomViewProps) {
 
           return (
             <div key={message.id} className={['flex items-start gap-2', gap].join(' ')}>
-              {firstOfRun ? <Avatar name={message.from ?? room.name} size={32} /> : <span className="w-8 shrink-0" />}
+              {firstOfRun ? <Avatar name={message.from ?? room.name} seed={message.fromId ?? room.peerId} size={32} decorative={showNames} /> : <span className="w-8 shrink-0" />}
               <div className="flex max-w-[72%] flex-col gap-1">
                 {showNames && firstOfRun ? <span className="text-caption font-semibold text-fg-muted">{message.from ?? room.name}</span> : null}
                 <div className="flex items-end gap-1.5">
@@ -148,9 +144,9 @@ export function ChatRoomView({ today = new Date() }: ChatRoomViewProps) {
         onSubmit={send}
       >
         <div className="mx-auto flex w-full max-w-[480px] items-center gap-2 px-3 pb-[calc(12px+var(--safe-area-bottom))] pt-2.5">
-          <button type="button" aria-label="첨부" className={ICON_BUTTON}>
-            <ChatIcon name="plus" className="size-6" />
-          </button>
+          <IconButton label="첨부" variant="ghost" size="sm">
+            <ChatIcon name="plus" className="size-6 text-fg-strong" />
+          </IconButton>
           <label className="sr-only" htmlFor="chat-message">메시지</label>
           <input
             id="chat-message"

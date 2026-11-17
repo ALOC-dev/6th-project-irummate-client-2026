@@ -13,6 +13,8 @@ export interface ChatRoomSummary {
   icon?: ChatRoomIcon;
   pinned?: boolean;
   group?: boolean;
+  /** 1:1 방 상대의 사람 번호. 프로필 색을 정한다. */
+  peerId?: number;
 }
 
 export interface ChatMessage {
@@ -22,4 +24,6 @@ export interface ChatMessage {
   text: string;
   sentAt: string;
   from?: string;
+  /** 보낸 사람의 사람 번호. 프로필 색을 정한다. */
+  fromId?: number;
 }

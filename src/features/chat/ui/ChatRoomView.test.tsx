@@ -21,7 +21,8 @@ describe('ChatRoomView', () => {
   it('방 정보와 메시지를 초안 구성으로 보여준다', () => {
     renderRoom('room-jia');
     expect(screen.getByRole('heading', { name: '지아' })).toBeInTheDocument();
-    expect(screen.getByText('매칭')).toBeInTheDocument();
+    // 채팅 상대 유형 태그(매칭·매이트 등)는 보여 주지 않는다.
+    expect(screen.queryByText('매칭')).not.toBeInTheDocument();
     expect(screen.getByText('매칭 성사 · 생활 궁합 88%')).toBeInTheDocument();
     expect(screen.getByText('11월 18일 수요일')).toBeInTheDocument();
     expect(screen.getByText('안녕하세요! 매칭돼서 반가워요')).toBeInTheDocument();
