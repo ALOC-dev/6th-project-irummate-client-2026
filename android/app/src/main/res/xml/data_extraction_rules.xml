@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  앱 데이터를 클라우드 백업과 기기 간 전송에서 모두 제외한다.
+  WebView 저장소(app_webview)에 재발급 토큰 쿠키가 들어가므로, 복원된 다른 기기에서 로그인이 유지되지 않게 한다.
+  Android 12 이상은 일부 기기에서 allowBackup="false"만으로 기기 간 전송이 막히지 않아 이 규칙으로 따로 막는다.
+  결정 기록: docs/adr/0002-native-projects.md
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" path="." />
+        <exclude domain="file" path="." />
+        <exclude domain="database" path="." />
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="external" path="." />
+        <exclude domain="device_root" path="." />
+        <exclude domain="device_file" path="." />
+        <exclude domain="device_database" path="." />
+        <exclude domain="device_sharedpref" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" path="." />
+        <exclude domain="file" path="." />
+        <exclude domain="database" path="." />
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="external" path="." />
+        <exclude domain="device_root" path="." />
+        <exclude domain="device_file" path="." />
+        <exclude domain="device_database" path="." />
+        <exclude domain="device_sharedpref" path="." />
+    </device-transfer>
+</data-extraction-rules>
