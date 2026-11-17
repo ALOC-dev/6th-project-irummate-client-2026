@@ -8,6 +8,8 @@ import {
   type MateCategory,
   type MatePostDraft,
 } from '../model/types';
+import { MateIcon } from './MateIcon';
+import { mateCategoryIcon } from './mateCategoryStyle';
 
 const INITIAL_DRAFT: MatePostDraft = {
   category: 'MEAL',
@@ -70,28 +72,38 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto [background:var(--app-background)]">
-      <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col px-5 pb-[calc(1.25rem+var(--safe-area-bottom))] pt-[var(--safe-area-top)]">
-        <header className="sticky top-0 z-10 -mx-5 flex min-h-16 items-center justify-between bg-glass-bar px-5 [backdrop-filter:var(--glass-filter)]">
-          <button
-            type="button"
-            className="flex h-11 items-center rounded-pill px-2 text-body-sm font-semibold text-fg-body focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
-            onClick={cancel}
-          >
-            취소
-          </button>
-          <h2 className="text-title-3 font-bold text-fg-strong">매이트 모집하기</h2>
-          <span className="w-14" aria-hidden="true" />
-        </header>
-
-        <form className="flex flex-1 flex-col pt-5" onSubmit={submit}>
+    <div className="fixed inset-0 z-50">
+      <button type="button" aria-label="작성 닫기" className="absolute inset-0 cursor-default bg-surface-overlay" onClick={cancel} />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mate-compose-title"
+        className={[
+          'absolute inset-x-2 bottom-[calc(12px+var(--safe-area-bottom))] top-[calc(8px+var(--safe-area-top))] mx-auto flex max-w-[464px] items-center',
+        ].join(' ')}
+      >
+        <div className="flex h-[min(600px,100%)] w-full flex-col overflow-hidden rounded-[32px] bg-glass-sheet shadow-lg [backdrop-filter:var(--glass-filter)]">
+          <header className="flex h-[52px] shrink-0 items-center justify-between pl-4 pr-1.5 pt-1">
+            <h2 id="mate-compose-title" className="m-0 text-title-3 font-bold tracking-irum-tight text-fg-strong">모집 글 작성</h2>
+            <button
+              type="button"
+              aria-label="닫기"
+              className="flex size-11 items-center justify-center rounded-pill text-fg-body hover:bg-primary-soft focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
+              onClick={cancel}
+            >
+              <MateIcon name="x" className="size-[22px]" />
+            </button>
+          </header>
+        <form className="flex min-h-0 flex-1 flex-col" onSubmit={submit}>
+          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-1 pt-1 [scrollbar-width:none]">
           <fieldset>
-            <legend className="mb-3 text-body-sm font-bold text-fg-strong">어떤 매이트를 찾나요?</legend>
+            <legend className="mb-2 text-body-sm font-semibold text-fg-strong">카테고리</legend>
             <div className="flex flex-wrap gap-2">
               {categories.map((category) => (
                 <FilterChip
                   key={category}
                   selected={draft.category === category}
+                  leading={<MateIcon name={mateCategoryIcon[category]} className="size-4" />}
                   onClick={() => setDraft((current) => ({ ...current, category }))}
                 >
                   {mateCategoryLabels[category]}
@@ -100,7 +112,7 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
             </div>
           </fieldset>
 
-          <div className="mt-7 grid gap-5">
+          <div className="grid gap-4">
             <TextField
               label="모집 제목"
               placeholder={isPurchase ? '예: 생수 2L 24병 나눠 사요' : '예: 오늘 저녁 학식 같이 드실 분'}
@@ -153,7 +165,7 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
             ) : null}
           </div>
 
-          <fieldset className="mt-7">
+          <fieldset>
             <legend className="mb-3 text-body-sm font-bold text-fg-strong">추가로 모집할 인원</legend>
             <div className="flex items-center justify-between rounded-control bg-glass-input p-2 ring-1 ring-inset ring-border-subtle">
               <button
@@ -174,10 +186,14 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
             </div>
           </fieldset>
 
-          <Button type="submit" size="lg" fullWidth disabled={!valid} className="mt-auto translate-y-2">
-            모집 글 올리기
-          </Button>
+          </div>
+          <div className="shrink-0 px-4 pb-4 pt-3">
+            <Button type="submit" size="lg" fullWidth disabled={!valid}>
+              모집 글 올리기
+            </Button>
+          </div>
         </form>
+        </div>
       </div>
     </div>
   );

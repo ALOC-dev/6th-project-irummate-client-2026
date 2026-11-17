@@ -6,6 +6,7 @@ import { getAccessToken, useSession, type OnboardingStage, type SessionUser } fr
 import { apiClient, AppError, type AppErrorKind } from '@shared/api';
 import { externalBrowser, push, type Unsubscribe } from '@shared/platform';
 import {
+  Avatar,
   BottomNav,
   BottomSheet,
   Button,
@@ -60,6 +61,7 @@ describe('계약', () => {
     expectTypeOf(Button).toBeFunction();
     expectTypeOf(EmptyState).toBeFunction();
     expectTypeOf(FilterChip).toBeFunction();
+    expectTypeOf(Avatar).toBeFunction();
     expectTypeOf(GlassCard).toBeFunction();
     expectTypeOf(IconButton).toBeFunction();
     expectTypeOf(PageHeader).toBeFunction();
