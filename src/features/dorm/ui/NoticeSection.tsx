@@ -2,6 +2,7 @@ import { GlassCard } from '@shared/ui';
 
 import type { DormNotice } from '../model/types';
 import { DormIcon } from './DormIcon';
+import { MarqueeText } from './MarqueeText';
 import { NewBadge } from './NoticeBadge';
 
 interface NoticeSectionProps {
@@ -41,15 +42,21 @@ export function NoticeSection({ notices, refreshing, onRefresh, onOpen }: Notice
             <li key={notice.id}>
               <button
                 type="button"
-                className="w-full py-3.5 text-left focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
+                className="w-full py-3 text-left focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
                 onClick={() => onOpen(notice)}
               >
-                <span className="mb-1 flex items-center gap-1.5">
-                  {notice.isNew ? <NewBadge /> : null}
-                  <span className="ml-auto text-micro text-fg-subtle">{notice.postedAt}</span>
+                <span className="flex h-[22px] items-center">
+                  {/* 배지 뒤 4px + 제목 상자 안쪽 8px(흐려지는 폭) = 배지와 제목 사이 경계 */}
+                  {notice.isNew ? <span className="mr-1 flex shrink-0 items-center"><NewBadge /></span> : null}
+                  <MarqueeText
+                    text={notice.title}
+                    bleedLeft={!notice.isNew}
+                    className="flex-1 text-body font-semibold leading-[22px] text-fg-strong"
+                  />
+                  {/* 제목이 잘리는 곳과 날짜 사이 16px = 날짜와 카드 오른쪽 끝 사이 16px */}
+                  <span className="shrink-0 pl-4 text-micro text-fg-subtle">{notice.postedAt}</span>
                 </span>
-                <span className="block text-body font-semibold leading-[22px] text-fg-strong">{notice.title}</span>
-                <span className="mt-0.5 block text-caption text-fg-muted">{notice.source}</span>
+                <span className="mt-0.5 block truncate text-caption text-fg-muted">{notice.source}</span>
               </button>
             </li>
           ))}

@@ -1,33 +1,6 @@
 import type { DormEvent } from './types';
 
-export interface YearMonth {
-  year: number;
-  month: number;
-}
-
-export function dateKey(year: number, month: number, date: number): string {
-  return `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-}
-
-export function toDateKey(date: Date): string {
-  return dateKey(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
-export function shiftMonth({ year, month }: YearMonth, amount: number): YearMonth {
-  const next = new Date(year, month + amount, 1);
-  return { year: next.getFullYear(), month: next.getMonth() };
-}
-
-export function monthCells({ year, month }: YearMonth): Array<number | null> {
-  const leading = new Date(year, month, 1).getDay();
-  const days = new Date(year, month + 1, 0).getDate();
-  const cells: Array<number | null> = [
-    ...Array<null>(leading).fill(null),
-    ...Array.from({ length: days }, (_, index) => index + 1),
-  ];
-  while (cells.length % 7) cells.push(null);
-  return cells;
-}
+export { dateKey, monthCells, shiftMonth, toDateKey, type YearMonth } from '@shared/lib';
 
 export function groupByDate(events: DormEvent[]): Map<string, DormEvent[]> {
   const grouped = new Map<string, DormEvent[]>();
