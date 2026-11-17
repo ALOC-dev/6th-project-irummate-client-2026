@@ -95,11 +95,11 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
             </button>
           </header>
         <form className="flex min-h-0 flex-1 flex-col" onSubmit={submit}>
-          <div className="flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto px-4 pb-1 pt-1 [scrollbar-width:none]">
+          <div className="flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto px-5 pb-1 pt-1 [scrollbar-width:none]">
           <fieldset>
             <legend className="mb-2 text-body-sm font-semibold text-fg-body">카테고리</legend>
             {/* 네 칩을 한 줄에 둔다(좁은 화면에서는 옆으로 밀어서 본다). 위아래 여백은 선택 칩의 빛이 잘리지 않게 넓히고 같은 만큼 되돌린다. */}
-            <div className="-mx-4 -mb-9 -mt-3 flex gap-1.5 overflow-x-auto px-4 pb-9 pt-3 [scrollbar-width:none]">
+            <div className="-mx-5 -mb-9 -mt-3 flex gap-1.5 overflow-x-auto px-5 pb-9 pt-3 [scrollbar-width:none]">
               {categories.map((category) => (
                 <FilterChip
                   key={category}
@@ -189,7 +189,7 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
           </fieldset>
 
           </div>
-          <div className="shrink-0 px-4 pb-4 pt-3">
+          <div className="shrink-0 px-5 pb-4 pt-3">
             <Button type="submit" size="lg" fullWidth disabled={!valid}>
               모집 글 올리기
             </Button>
