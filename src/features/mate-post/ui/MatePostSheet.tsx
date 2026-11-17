@@ -47,7 +47,7 @@ export function MatePostSheet({ post, onClose, onBookmark, onJoin }: MatePostShe
     >
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2.5">
-          <Avatar name={post.authorNickname} size={36} />
+          <Avatar name={post.authorNickname} size={36} decorative />
           <div className="min-w-0 flex-1">
             <p className="m-0 text-body-sm font-bold text-fg-strong">{post.authorNickname}</p>
             <p className="m-0 text-caption text-fg-muted">모집자 · {formatCreatedAt(post.createdAt)}</p>

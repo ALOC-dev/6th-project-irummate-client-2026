@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it } from 'vitest';
@@ -64,8 +64,23 @@ describe('MateBoard', () => {
     await user.type(screen.getByLabelText('모집 제목'), '같이 산책해요');
     await user.type(screen.getByLabelText('모집 내용'), '저녁에 가볍게 걸어요.');
     await user.type(screen.getByLabelText('만날 장소'), '생활관 로비');
-    fireEvent.change(screen.getByLabelText('활동 일시'), { target: { value: '2099-11-16T20:00' } });
-    fireEvent.change(screen.getByLabelText('모집 마감 일시'), { target: { value: '2099-11-16T19:00' } });
+    // 날짜에 상관없이 통과하도록 다음 달 15일을 고른다.
+    await user.click(screen.getByRole('button', { name: /^활동 일시/ }));
+    const activity = screen.getByRole('group', { name: '활동 일시 고르기' });
+    await user.click(within(activity).getByRole('button', { name: '다음 달' }));
+    await user.click(within(activity).getByRole('button', { name: /월 15일$/ }));
+    await user.click(within(within(activity).getByRole('listbox', { name: '시' })).getByRole('option', { name: '20' }));
+    await user.click(within(within(activity).getByRole('listbox', { name: '분' })).getByRole('option', { name: '00' }));
+    expect(screen.getByRole('button', { name: /^활동 일시 .*20:00$/ })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /^모집 마감 일시/ }));
+    expect(screen.queryByRole('group', { name: '활동 일시 고르기' })).not.toBeInTheDocument();
+    const deadline = screen.getByRole('group', { name: '모집 마감 일시 고르기' });
+    await user.click(within(deadline).getByRole('button', { name: '다음 달' }));
+    await user.click(within(deadline).getByRole('button', { name: /월 15일$/ }));
+    await user.click(within(within(deadline).getByRole('listbox', { name: '시' })).getByRole('option', { name: '19' }));
+    await user.click(within(within(deadline).getByRole('listbox', { name: '분' })).getByRole('option', { name: '30' }));
+    expect(screen.getByRole('button', { name: /^모집 마감 일시 .*19:30$/ })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: '모집 글 올리기' }));
     expect(screen.getByRole('status')).toHaveTextContent('모집 글을 올렸어요');
     await user.click(screen.getByRole('button', { name: '밥 모집: 같이 산책해요' }));

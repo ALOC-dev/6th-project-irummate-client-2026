@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 
 import { paths } from '@app/router/paths';
-import { FilterChip, Toast } from '@shared/ui';
+import { EmptyState, FilterChip, GlassCard, IconButton, PageHeader, Toast } from '@shared/ui';
 
 import { matePostFixtures } from '../model/fixtures';
 import { compareDeadlineAt, isRecruitmentOpen } from '../model/recruitmentRules';
@@ -16,15 +16,9 @@ import {
 } from '../model/types';
 import { MateComposeOverlay } from './MateComposeOverlay';
 import { MateIcon } from './MateIcon';
-import { mateCategoryIcon } from './mateCategoryStyle';
+import { MateCategoryIcon } from './MateCategoryIcon';
 import { MatePostCard } from './MatePostCard';
 import { MatePostSheet } from './MatePostSheet';
-
-const HEADER_BUTTON = [
-  'inline-flex size-11 items-center justify-center rounded-pill bg-transparent',
-  'transition-transform duration-[var(--duration-fast)] active:scale-90',
-  'focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]',
-].join(' ');
 
 const SORTS: Array<[MateSort, string]> = [['new', '최신순'], ['closing', '마감 임박순']];
 
@@ -121,29 +115,29 @@ export function MateBoard() {
   };
 
   return (
-    <main className="min-h-dvh pb-[var(--bottom-nav-clearance)] pt-[var(--safe-area-top)]">
+    <main className="min-h-dvh pb-[var(--bottom-nav-clearance)]">
       <h2 className="sr-only">MT-01 매이트</h2>
-      <header className="sticky top-0 z-20 bg-glass-bar shadow-[inset_0_-1px_0_var(--color-glass-edge)] [backdrop-filter:var(--glass-filter)]">
-        <div className="mx-auto flex h-[var(--topbar-height)] w-full max-w-[480px] items-center gap-1 px-2">
-          <h1 className="m-0 flex-1 pl-3 text-[30px] font-extrabold leading-[26px] tracking-irum-tight text-fg-brand">매이트</h1>
-          <div className="flex gap-0.5">
-            <button type="button" aria-label="검색" className={HEADER_BUTTON} onClick={() => setToast('검색은 준비 중이에요')}>
+      <PageHeader
+        title={<img src="/brand/mate-wordmark-blue.png" alt="매이트" className="block h-[var(--wordmark-height)] w-auto" />}
+        actions={(
+          <>
+            <IconButton label="검색" variant="ghost" size="sm" onClick={() => setToast('검색은 준비 중이에요')}>
               <MateIcon name="search" className="size-[22px] text-fg-strong" />
-            </button>
-            <button type="button" aria-label="채팅" className={HEADER_BUTTON} onClick={() => navigate(paths.chats)}>
+            </IconButton>
+            <IconButton label="채팅" variant="ghost" size="sm" onClick={() => navigate(paths.chats)}>
               <MateIcon name="chat" className="size-[22px] text-fg-brand" />
-            </button>
-          </div>
-        </div>
-      </header>
+            </IconButton>
+          </>
+        )}
+      />
 
-      <div className="mx-auto flex w-full max-w-[480px] flex-col gap-4 px-5 pb-6 pt-5">
-        <div className="-mx-5 -my-2 flex gap-2 overflow-x-auto px-5 pb-2.5 pt-2 [scrollbar-width:none]" role="group" aria-label="매이트 카테고리">
+      <div className="mx-auto flex w-full max-w-[480px] flex-col gap-4 px-5 pb-6 pt-4">
+        <div className="-mx-5 -mb-9 -mt-3 flex gap-2 overflow-x-auto px-5 pb-9 pt-3 [scrollbar-width:none]" role="group" aria-label="매이트 카테고리">
           {mateCategories.map((item) => (
             <FilterChip
               key={item}
               selected={category === item}
-              leading={item === 'ALL' ? undefined : <MateIcon name={mateCategoryIcon[item]} className="size-4" />}
+              leading={item === 'ALL' ? undefined : <MateCategoryIcon category={item} className="size-[18px]" />}
               onClick={() => setCategory(item)}
             >
               {mateCategoryLabels[item]}
@@ -202,13 +196,13 @@ export function MateBoard() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-2 rounded-card bg-glass-soft px-5 py-9 text-center ring-1 ring-inset ring-glass-edge [backdrop-filter:var(--glass-filter)]">
-            <span className="inline-flex size-14 items-center justify-center rounded-pill bg-primary-soft text-fg-brand">
-              <MateIcon name={bookmarkedOnly ? 'bookmark' : 'search'} className="size-[26px]" />
-            </span>
-            <p className="m-0 mt-1 text-[16px] font-bold text-fg-strong">{emptyTitle}</p>
-            <p className="m-0 text-[13px] leading-5 text-fg-muted">{emptyDescription}</p>
-          </div>
+          <GlassCard padding="none">
+            <EmptyState
+              icon={<MateIcon name={bookmarkedOnly ? 'bookmark' : 'search'} className="size-[26px]" />}
+              title={emptyTitle}
+              description={emptyDescription}
+            />
+          </GlassCard>
         )}
       </div>
 

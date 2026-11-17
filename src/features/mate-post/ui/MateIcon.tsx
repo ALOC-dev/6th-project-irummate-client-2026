@@ -2,6 +2,10 @@ import type { SVGProps } from 'react';
 
 const PATHS = {
   bookmark: ['m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z'],
+  calendar: ['M8 2v4', 'M16 2v4', 'M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z', 'M3 10h18'],
+  'chevron-down': ['m6 9 6 6 6-6'],
+  'chevron-left': ['m15 18-6-6 6-6'],
+  'chevron-right': ['m9 18 6-6-6-6'],
   chat: ['M7.9 20A9 9 0 1 0 4 16.1L2 22Z'],
   check: ['M20 6 9 17l-5-5'],
   clock: ['M12 6v6h4.5'],
