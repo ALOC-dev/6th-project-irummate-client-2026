@@ -1,5 +1,7 @@
+import { useSession } from '@features/auth';
 import { DormHomeView } from '@features/dorm';
 
 export default function HomePage() {
-  return <DormHomeView />;
+  const { user } = useSession();
+  return <DormHomeView roomLabel={user?.dormRoom ?? undefined} />;
 }

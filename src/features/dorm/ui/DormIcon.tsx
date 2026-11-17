@@ -1,18 +1,31 @@
 import type { SVGProps } from 'react';
 
-type DormIconName = 'bell' | 'building' | 'calendar' | 'chat' | 'chevron-left' | 'chevron-right' | 'refresh';
+export type DormIconName = 'bell' | 'building' | 'chat' | 'chevron-left' | 'chevron-right' | 'refresh';
+
+const PATHS: Record<DormIconName, string[]> = {
+  bell: [
+    'M10.268 21a2 2 0 0 0 3.464 0',
+    'M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326',
+  ],
+  building: [
+    'M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z',
+    'M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2',
+    'M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2',
+    'M10 6h4', 'M10 10h4', 'M10 14h4', 'M10 18h4',
+  ],
+  chat: ['M7.9 20A9 9 0 1 0 4 16.1L2 22Z'],
+  'chevron-left': ['m15 18-6-6 6-6'],
+  'chevron-right': ['m9 18 6-6-6-6'],
+  refresh: [
+    'M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8', 'M21 3v5h-5',
+    'M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16', 'M8 16H3v5',
+  ],
+};
 
 export function DormIcon({ name, ...props }: SVGProps<SVGSVGElement> & { name: DormIconName }) {
-  const common = { fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
   return (
-    <svg {...props} {...common} viewBox="0 0 24 24" aria-hidden="true">
-      {name === 'bell' ? <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M10 21h4" /></> : null}
-      {name === 'building' ? <><rect x="4" y="3" width="14" height="18" rx="2" /><path d="M9 21v-4h4v4M8 7h2M13 7h2M8 11h2M13 11h2M18 9h2v12H2" /></> : null}
-      {name === 'calendar' ? <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></> : null}
-      {name === 'chat' ? <><path d="M21 15a4 4 0 0 1-4 4H8l-5 3 1.7-5A8 8 0 1 1 21 15z" /><path d="M8 10h8M8 14h5" /></> : null}
-      {name === 'chevron-left' ? <path d="m15 18-6-6 6-6" /> : null}
-      {name === 'chevron-right' ? <path d="m9 18 6-6-6-6" /> : null}
-      {name === 'refresh' ? <><path d="M20 6v5h-5" /><path d="M4 18v-5h5" /><path d="M18.5 9a7 7 0 0 0-12-2L4 11M5.5 15a7 7 0 0 0 12 2l2.5-4" /></> : null}
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {PATHS[name].map((d) => <path key={d} d={d} />)}
     </svg>
   );
 }
