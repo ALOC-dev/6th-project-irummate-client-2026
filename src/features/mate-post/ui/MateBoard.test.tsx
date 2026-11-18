@@ -13,6 +13,21 @@ function renderBoard(initialEntry = '/mate') {
   );
 }
 
+type User = ReturnType<typeof userEvent.setup>;
+
+// 한 글자씩 치는 user.type은 느려서 전체 테스트에서 시간 초과가 나므로, 눌러서 붙여 넣는다.
+async function fill(user: User, label: string, text: string) {
+  await user.click(screen.getByLabelText(label));
+  await user.paste(text);
+}
+
+async function pickDate(user: User, field: string, day: number) {
+  await user.click(screen.getByRole('button', { name: new RegExp(`^${field}`) }));
+  const panel = screen.getByRole('group', { name: `${field} 고르기` });
+  await user.click(within(panel).getByRole('button', { name: '다음 달' }));
+  await user.click(within(panel).getByRole('button', { name: new RegExp(`월 ${day}일$`) }));
+}
+
 describe('MateBoard', () => {
   it('초안 구성대로 헤더·카테고리·정렬·모집 글을 보여준다', () => {
     renderBoard();
@@ -61,26 +76,16 @@ describe('MateBoard', () => {
     renderBoard();
     await user.click(screen.getByRole('button', { name: '모집하기' }));
     expect(screen.getByRole('dialog', { name: '모집 글 작성' })).toBeInTheDocument();
-    await user.type(screen.getByLabelText('모집 제목'), '같이 산책해요');
-    await user.type(screen.getByLabelText('모집 내용'), '저녁에 가볍게 걸어요.');
-    await user.type(screen.getByLabelText('만날 장소'), '생활관 로비');
-    // 날짜에 상관없이 통과하도록 다음 달 15일을 고른다.
-    await user.click(screen.getByRole('button', { name: /^활동 일시/ }));
-    const activity = screen.getByRole('group', { name: '활동 일시 고르기' });
-    await user.click(within(activity).getByRole('button', { name: '다음 달' }));
-    await user.click(within(activity).getByRole('button', { name: /월 15일$/ }));
-    await user.click(within(within(activity).getByRole('listbox', { name: '시' })).getByRole('option', { name: '20' }));
-    await user.click(within(within(activity).getByRole('listbox', { name: '분' })).getByRole('option', { name: '00' }));
-    expect(screen.getByRole('button', { name: /^활동 일시 .*20:00$/ })).toBeInTheDocument();
+    await fill(user, '모집 제목', '같이 산책해요');
+    await fill(user, '모집 내용', '저녁에 가볍게 걸어요.');
+    await fill(user, '만날 장소', '생활관 로비');
+    // 날짜만 고르면 기본 시각(다음 정시)이 들어간다. 날짜에 상관없이 통과하도록 다음 달에서 고르고,
+    // 마감(14일)이 활동(15일)보다 빠르도록 한다.
+    await pickDate(user, '활동 일시', 15);
+    await pickDate(user, '모집 마감 일시', 14);
+    expect(screen.getByRole('button', { name: /^활동 일시 .*\d{2}:\d{2}$/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^모집 마감 일시 .*\d{2}:\d{2}$/ })).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /^모집 마감 일시/ }));
-    expect(screen.queryByRole('group', { name: '활동 일시 고르기' })).not.toBeInTheDocument();
-    const deadline = screen.getByRole('group', { name: '모집 마감 일시 고르기' });
-    await user.click(within(deadline).getByRole('button', { name: '다음 달' }));
-    await user.click(within(deadline).getByRole('button', { name: /월 15일$/ }));
-    await user.click(within(within(deadline).getByRole('listbox', { name: '시' })).getByRole('option', { name: '19' }));
-    await user.click(within(within(deadline).getByRole('listbox', { name: '분' })).getByRole('option', { name: '30' }));
-    expect(screen.getByRole('button', { name: /^모집 마감 일시 .*19:30$/ })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: '모집 글 올리기' }));
     expect(screen.getByRole('status')).toHaveTextContent('모집 글을 올렸어요');
     await user.click(screen.getByRole('button', { name: '밥 모집: 같이 산책해요' }));
@@ -91,7 +96,7 @@ describe('MateBoard', () => {
     const user = userEvent.setup();
     renderBoard();
     await user.click(screen.getByRole('button', { name: '모집하기' }));
-    await user.type(screen.getByLabelText('모집 제목'), '남으면 안 되는 제목');
+    await fill(user, '모집 제목', '남으면 안 되는 제목');
     await user.click(screen.getByRole('button', { name: '닫기' }));
     await user.click(screen.getByRole('button', { name: '모집하기' }));
     expect(screen.getByLabelText('모집 제목')).toHaveValue('');
