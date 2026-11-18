@@ -1,5 +1,7 @@
-import { ScreenPlaceholder } from '../ScreenPlaceholder';
+import { useSession } from '@features/auth';
+import { DormHomeView } from '@features/dorm';
 
 export default function HomePage() {
-  return <ScreenPlaceholder screenId="HM-01" name="홈" />;
+  const { user } = useSession();
+  return <DormHomeView roomLabel={user?.dormRoom ?? undefined} />;
 }

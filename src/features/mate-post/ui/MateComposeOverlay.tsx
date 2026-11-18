@@ -8,6 +8,9 @@ import {
   type MateCategory,
   type MatePostDraft,
 } from '../model/types';
+import { DateTimeField } from './DateTimeField';
+import { MateCategoryIcon } from './MateCategoryIcon';
+import { MateIcon } from './MateIcon';
 
 const INITIAL_DRAFT: MatePostDraft = {
   category: 'MEAL',
@@ -20,11 +23,6 @@ const INITIAL_DRAFT: MatePostDraft = {
   estimatedFee: '',
 };
 
-function toLocalDateTimeInputValue(date: Date) {
-  const localTime = date.getTime() - date.getTimezoneOffset() * 60 * 1000;
-  return new Date(localTime).toISOString().slice(0, 16);
-}
-
 interface MateComposeOverlayProps {
   open: boolean;
   onClose: () => void;
@@ -33,11 +31,11 @@ interface MateComposeOverlayProps {
 
 export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverlayProps) {
   const [draft, setDraft] = useState(INITIAL_DRAFT);
+  const [picker, setPicker] = useState<'activity' | 'deadline' | null>(null);
   const categories = mateCategories.filter((category): category is MateCategory => category !== 'ALL');
   const isPurchase = draft.category === 'GROUP_BUY';
   const activityAt = new Date(draft.activityAt).getTime();
   const deadlineAt = new Date(draft.deadlineAt).getTime();
-  const minimumDateTime = toLocalDateTimeInputValue(new Date());
   const valid = Boolean(
     draft.title.trim()
     && draft.activityAt
@@ -62,36 +60,52 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
     if (!valid) return;
     onSubmit(draft);
     setDraft(INITIAL_DRAFT);
+    setPicker(null);
   };
 
   const cancel = () => {
     setDraft(INITIAL_DRAFT);
+    setPicker(null);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto [background:var(--app-background)]">
-      <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col px-5 pb-[calc(1.25rem+var(--safe-area-bottom))] pt-[var(--safe-area-top)]">
-        <header className="sticky top-0 z-10 -mx-5 flex min-h-16 items-center justify-between bg-glass-bar px-5 [backdrop-filter:var(--glass-filter)]">
-          <button
-            type="button"
-            className="flex h-11 items-center rounded-pill px-2 text-body-sm font-semibold text-fg-body focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
-            onClick={cancel}
-          >
-            취소
-          </button>
-          <h2 className="text-title-3 font-bold text-fg-strong">매이트 모집하기</h2>
-          <span className="w-14" aria-hidden="true" />
-        </header>
-
-        <form className="flex flex-1 flex-col pt-5" onSubmit={submit}>
+    <div className="fixed inset-0 z-50">
+      <button type="button" aria-label="작성 닫기" className="absolute inset-0 cursor-default bg-surface-overlay" onClick={cancel} />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mate-compose-title"
+        className={[
+          'absolute inset-x-2 bottom-[calc(12px+var(--safe-area-bottom))] top-[calc(8px+var(--safe-area-top))] mx-auto flex max-w-[464px] items-center',
+        ].join(' ')}
+      >
+        <div className="flex h-full w-full flex-col overflow-hidden rounded-[32px] bg-glass-sheet shadow-lg [backdrop-filter:var(--glass-filter)]">
+          {/* 제목을 가운데 두려고 닫기 버튼과 같은 폭(44px)의 빈칸을 왼쪽에 둔다. */}
+          <header className="grid h-[52px] shrink-0 grid-cols-[44px_1fr_44px] items-center px-1.5 pt-1">
+            <span aria-hidden="true" />
+            <h2 id="mate-compose-title" className="m-0 text-center text-title-3 font-bold tracking-irum-tight text-fg-strong">모집 글 작성</h2>
+            <button
+              type="button"
+              aria-label="닫기"
+              className="flex size-11 items-center justify-center rounded-pill text-fg-body hover:bg-primary-soft focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
+              onClick={cancel}
+            >
+              <MateIcon name="x" className="size-[22px]" />
+            </button>
+          </header>
+        <form className="flex min-h-0 flex-1 flex-col" onSubmit={submit}>
+          <div className="flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto px-5 pb-1 pt-1 [scrollbar-width:none]">
           <fieldset>
-            <legend className="mb-3 text-body-sm font-bold text-fg-strong">어떤 매이트를 찾나요?</legend>
-            <div className="flex flex-wrap gap-2">
+            <legend className="mb-2 text-body-sm font-semibold text-fg-body">카테고리</legend>
+            {/* 네 칩을 한 줄에 둔다(좁은 화면에서는 옆으로 밀어서 본다). 위아래 여백은 선택 칩의 빛이 잘리지 않게 넓히고 같은 만큼 되돌린다. */}
+            <div className="-mx-5 -mb-9 -mt-3 flex gap-1.5 overflow-x-auto px-5 pb-9 pt-3 [scrollbar-width:none]">
               {categories.map((category) => (
                 <FilterChip
                   key={category}
+                  className="px-3.5"
                   selected={draft.category === category}
+                  leading={<MateCategoryIcon category={category} className="size-[18px]" />}
                   onClick={() => setDraft((current) => ({ ...current, category }))}
                 >
                   {mateCategoryLabels[category]}
@@ -100,7 +114,7 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
             </div>
           </fieldset>
 
-          <div className="mt-7 grid gap-5">
+          <div className="grid gap-3.5">
             <TextField
               label="모집 제목"
               placeholder={isPurchase ? '예: 생수 2L 24병 나눠 사요' : '예: 오늘 저녁 학식 같이 드실 분'}
@@ -124,19 +138,19 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
                 onChange={(event) => setDraft((current) => ({ ...current, place: event.target.value }))}
               />
             ) : null}
-            <TextField
+            <DateTimeField
               label={isPurchase ? '수령·나눔 일시' : '활동 일시'}
-              type="datetime-local"
-              min={minimumDateTime}
               value={draft.activityAt}
-              onChange={(event) => setDraft((current) => ({ ...current, activityAt: event.target.value }))}
+              open={picker === 'activity'}
+              onToggle={() => setPicker((current) => current === 'activity' ? null : 'activity')}
+              onChange={(activityAt) => setDraft((current) => ({ ...current, activityAt }))}
             />
-            <TextField
+            <DateTimeField
               label="모집 마감 일시"
-              type="datetime-local"
-              min={minimumDateTime}
               value={draft.deadlineAt}
-              onChange={(event) => setDraft((current) => ({ ...current, deadlineAt: event.target.value }))}
+              open={picker === 'deadline'}
+              onToggle={() => setPicker((current) => current === 'deadline' ? null : 'deadline')}
+              onChange={(deadlineAt) => setDraft((current) => ({ ...current, deadlineAt }))}
               errorMessage={draft.activityAt && draft.deadlineAt && deadlineAt >= activityAt
                 ? '모집 마감은 활동 일시보다 빨라야 해요.'
                 : undefined}
@@ -153,8 +167,8 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
             ) : null}
           </div>
 
-          <fieldset className="mt-7">
-            <legend className="mb-3 text-body-sm font-bold text-fg-strong">추가로 모집할 인원</legend>
+          <fieldset>
+            <legend className="mb-2 text-body-sm font-semibold text-fg-body">추가로 모집할 인원</legend>
             <div className="flex items-center justify-between rounded-control bg-glass-input p-2 ring-1 ring-inset ring-border-subtle">
               <button
                 type="button"
@@ -174,10 +188,14 @@ export function MateComposeOverlay({ open, onClose, onSubmit }: MateComposeOverl
             </div>
           </fieldset>
 
-          <Button type="submit" size="lg" fullWidth disabled={!valid} className="mt-auto translate-y-2">
-            모집 글 올리기
-          </Button>
+          </div>
+          <div className="shrink-0 px-5 pb-4 pt-3">
+            <Button type="submit" size="lg" fullWidth disabled={!valid}>
+              모집 글 올리기
+            </Button>
+          </div>
         </form>
+        </div>
       </div>
     </div>
   );
