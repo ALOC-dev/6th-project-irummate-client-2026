@@ -38,7 +38,8 @@ describe('MateBoard', () => {
     expect(screen.getByRole('tab', { name: '최신순' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByText('모집 글 5개')).toBeInTheDocument();
     expect(screen.queryByText('휴지 30롤 공구 (마감)')).not.toBeInTheDocument();
-    const water = screen.getByRole('button', { name: '공동구매 모집: 생수 2L 24병 나눠 사요' });
+    // 열기 버튼은 카드 전체를 덮는 빈 버튼이므로, 카드 내용은 그 버튼의 부모(카드)에서 찾는다.
+    const water = screen.getByRole('button', { name: '공동구매 모집: 생수 2L 24병 나눠 사요' }).parentElement as HTMLElement;
     expect(within(water).getByText('1인 3,200원')).toBeInTheDocument();
     expect(within(water).getByText('5/6명')).toBeInTheDocument();
   });

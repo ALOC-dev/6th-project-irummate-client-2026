@@ -1,5 +1,3 @@
-import type { KeyboardEvent } from 'react';
-
 import { estimateFeePerPerson } from '../model/estimateFeePerPerson';
 import { formatCreatedAt, formatDeadline, formatShortDateTime } from '../model/formatDateTime';
 import { mateCategoryLabels, type MatePost } from '../model/types';
@@ -20,28 +18,21 @@ export function MatePostCard({ post, onOpen, onBookmark }: MatePostCardProps) {
   // 한 자리만 남은 글은 빨간색으로 눈에 띄게 한다.
   const lastSpot = post.maxParticipants - post.nowParticipants === 1;
 
-  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget) return;
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      onOpen();
-    }
-  };
-
   return (
     <div
-      role="button"
-      tabIndex={0}
-      aria-label={`${mateCategoryLabels[post.category]} 모집: ${post.title}`}
       className={[
-        'flex items-center gap-3 rounded-card bg-surface-card px-4 py-3.5 text-left shadow-glass ring-1 ring-inset ring-glass-edge [backdrop-filter:var(--glass-filter)]',
-        'cursor-pointer transition-transform duration-[var(--duration-fast)] ease-irum-out active:scale-[0.985]',
-        'focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]',
+        'relative flex items-center gap-3 rounded-card bg-surface-card px-4 py-3.5 text-left shadow-glass ring-1 ring-inset ring-glass-edge [backdrop-filter:var(--glass-filter)]',
+        'transition-transform duration-[var(--duration-fast)] ease-irum-out active:scale-[0.985]',
         post.full && !joined ? 'opacity-60' : '',
       ].join(' ')}
-      onClick={onOpen}
-      onKeyDown={onKeyDown}
     >
+      {/* 카드 전체를 덮는 투명 열기 버튼. 즐겨찾기 버튼은 이 버튼의 형제로 두고 위(z-[1])에 올린다. */}
+      <button
+        type="button"
+        aria-label={`${mateCategoryLabels[post.category]} 모집: ${post.title}`}
+        className="absolute inset-0 rounded-card focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
+        onClick={onOpen}
+      />
       <span className="inline-flex size-[46px] shrink-0 items-center justify-center rounded-[16px] bg-surface-icon text-fg-brand shadow-xs">
         <MateCategoryIcon category={post.category} className="size-[25px]" />
       </span>
@@ -51,11 +42,10 @@ export function MatePostCard({ post, onOpen, onBookmark }: MatePostCardProps) {
           <span className="shrink-0 whitespace-nowrap text-micro text-fg-muted">{formatCreatedAt(post.createdAt)}</span>
           <button
             type="button"
-            className="-my-3 -ml-1 -mr-2.5 flex size-11 shrink-0 items-center justify-center rounded-pill focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
+            className="relative z-[1] -my-3 -ml-1 -mr-2.5 flex size-11 shrink-0 items-center justify-center rounded-pill focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
             aria-label={post.bookmarked ? `즐겨찾기 해제: ${post.title}` : `즐겨찾기에 저장: ${post.title}`}
             aria-pressed={post.bookmarked}
-            onClick={(event) => { event.stopPropagation(); onBookmark(); }}
-            onKeyDown={(event) => event.stopPropagation()}
+            onClick={onBookmark}
           >
             <MateIcon
               name="bookmark"
