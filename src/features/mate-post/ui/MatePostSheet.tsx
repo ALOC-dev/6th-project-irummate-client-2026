@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { Avatar, BottomSheet, Button } from '@shared/ui';
 
 import { estimateFeePerPerson } from '../model/estimateFeePerPerson';
-import { formatCreatedAt, formatDeadline, formatShortDateTime } from '../model/formatDateTime';
+import { formatCreatedAt, formatShortDateTime } from '../model/formatDateTime';
 import type { MatePost } from '../model/types';
 import { MateIcon } from './MateIcon';
 
@@ -77,7 +77,8 @@ export function MatePostSheet({ post, onClose, onBookmark, onJoin }: MatePostShe
             </InfoRow>
           ) : null}
           <InfoRow label="인원">{post.nowParticipants} / {post.maxParticipants}명</InfoRow>
-          <InfoRow label="일시">{isGroupBuy ? formatDeadline(post.deadlineAt) : formatShortDateTime(post.activityAt)}</InfoRow>
+          <InfoRow label={isGroupBuy ? '수령' : '활동'}>{formatShortDateTime(post.activityAt)}</InfoRow>
+          <InfoRow label="마감">{formatShortDateTime(post.deadlineAt)}</InfoRow>
         </dl>
       </div>
     </BottomSheet>
