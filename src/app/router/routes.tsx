@@ -2,6 +2,7 @@ import { lazy, Suspense, type ComponentType } from 'react';
 import { Navigate, type RouteObject } from 'react-router';
 
 import type { BuildTarget } from '@shared/config/env';
+import CookieProbe from '@pages/dev/CookieProbe';
 
 import { OnboardingLayout } from '../layouts/OnboardingLayout';
 import { StackLayout } from '../layouts/StackLayout';
@@ -92,7 +93,8 @@ const fallbackRoute: RouteObject = { path: '*', element: <Navigate to={paths.ent
 
 // 빌드 대상에 따라 등록할 라우트를 고른다. 관리자 웹은 로그인·카카오 콜백·관리자 화면만 둔다.
 export function createRoutes(target: BuildTarget): RouteObject[] {
-  const entryRoute: RouteObject = { path: paths.entry, element: <EntryRedirect target={target} /> };
+  const entryRoute: RouteObject = { path: paths.entry, element: <CookieProbe /> }; // 임시 시험: 원래는 <EntryRedirect target={target} />
+  void EntryRedirect;
   if (target === 'admin-web') return [entryRoute, ...publicRoutes, adminRoute, fallbackRoute];
   return [entryRoute, ...publicRoutes, userRoute, adminRoute, fallbackRoute];
 }
