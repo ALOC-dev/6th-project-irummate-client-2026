@@ -120,14 +120,16 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 ### 기본 원칙
 
 - 모든 기능 변경은 PR을 통해 `main`에 병합한다.
-- PR 작성자는 자신의 PR을 승인하거나 직접 병합하지 않는다.
 - `iaruok`의 PR은 `uukdo`, `uukdo`의 PR은 `iaruok`가 검토한다.
-- 상대 개발자의 승인(Approve) 1회와 필수 CI 통과 후 병합한다.
-- 승인 이후 새로운 커밋이 추가되면 재검토를 받는다.
+- 필수 CI 통과는 모든 PR의 병합 조건이다.
+- 아래 Critical Review 항목에 해당하면 상대 개발자의 승인(Approve) 1회를 받은 뒤 병합한다.
+- 그 밖의 변경은 상대 개발자의 승인을 **권고**한다. 승인을 기다리기 어려운 경우 예외적으로 PR 작성자가 직접 병합할 수 있다.
+  - PR 본문에 직접 병합한 이유를 적고, 병합 후 상대에게 알린다.
+  - 상대는 병합 후에도 검토할 수 있다. 문제가 나오면 작성자가 후속 PR로 고친다.
 
 ### Critical Review
 
-다음 항목은 **필수 검토 대상**이며, 문제가 해결되기 전까지 병합할 수 없다.
+다음 항목은 **필수 검토 대상**이다. 상대 개발자의 승인 없이 병합할 수 없고, 문제가 해결되기 전까지 병합할 수 없다.
 
 1. **공통 계약 변경:** API, 라우팅, 공개 인터페이스 및 데이터 모델 변경
 2. **소유권 변경:** 상대 개발자의 담당 영역을 수정하는 경우
@@ -147,7 +149,7 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 ### Merge Policy
 
 - `main` 직접 push 금지
-- 승인 없는 PR 병합 금지
 - 필수 CI 실패 시 병합 금지
+- Critical Review 항목에 해당하는 PR은 승인 없이 병합 금지
 - 미해결 Blocking Comment가 있는 PR 병합 금지
-- 승인 이후 코드 변경 시 재승인 필수
+- Critical Review 항목에 해당하는 PR은 승인 이후 코드 변경 시 재승인 필수
