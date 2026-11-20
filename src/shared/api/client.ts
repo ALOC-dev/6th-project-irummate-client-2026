@@ -4,7 +4,7 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 import { env } from '@shared/config/env';
 
-import { toAppError } from './errors';
+import { AppError, toAppError } from './errors';
 
 export interface AuthHandlers {
   getAccessToken: () => string | null;
@@ -47,7 +47,8 @@ export function refreshAccessToken(): Promise<string> {
       .post<{ data?: { accessToken?: string } }>('/api/auth/refresh')
       .then((response) => {
         const accessToken = response.data?.data?.accessToken;
-        if (!accessToken) throw toAppError(new Error('재발급 응답에 접근 토큰이 없습니다.'));
+        // 서버가 응답 형식을 어긴 경우다. 사용자에게는 서버 오류 기본 문구를 보이고, 로그아웃하지 않는다.
+        if (!accessToken) throw new AppError({ kind: 'server' });
         handlers.setAccessToken(accessToken);
         handlers.onTokenRefreshed();
         return accessToken;
