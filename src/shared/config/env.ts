@@ -8,11 +8,17 @@ function readBuildTarget(value: string | undefined): BuildTarget {
   return value === 'admin-web' ? 'admin-web' : 'app';
 }
 
+// 앞뒤 공백을 지운 값만 쓴다. 검사한 값과 실제로 요청에 쓰는 값을 같게 하기 위해서다.
+// .env의 따옴표 없는 값은 Vite가 이미 다듬지만, 따옴표 안의 값과 배포 환경(Vercel 등)에 붙여 넣은 값은 공백이 남을 수 있다.
+function readText(value: string | undefined): string {
+  return (value ?? '').trim();
+}
+
 export const env = {
   buildTarget: readBuildTarget(import.meta.env.VITE_BUILD_TARGET),
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL ?? '',
-  kakaoClientId: import.meta.env.VITE_KAKAO_CLIENT_ID ?? '',
-  kakaoRedirectUri: import.meta.env.VITE_KAKAO_REDIRECT_URI ?? '',
+  apiBaseUrl: readText(import.meta.env.VITE_API_BASE_URL),
+  kakaoClientId: readText(import.meta.env.VITE_KAKAO_CLIENT_ID),
+  kakaoRedirectUri: readText(import.meta.env.VITE_KAKAO_REDIRECT_URI),
   enableMocks: import.meta.env.DEV && import.meta.env.VITE_ENABLE_MSW === 'true',
 } as const;
 

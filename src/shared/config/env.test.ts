@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { EnvError, findMissingEnv, type EnvCheckOptions, type EnvValues } from './env';
 
@@ -34,6 +34,35 @@ describe('findMissingEnv', () => {
     ],
   ])('%s', (_name, override, options, expected) => {
     expect(findMissingEnv({ ...filled, ...override }, options)).toEqual(expected);
+  });
+});
+
+describe('env 객체', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
+
+  it('요청에 쓰는 값도 검사한 값과 같게 앞뒤 공백을 지운다', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', '  https://api.example.com \n');
+    vi.stubEnv('VITE_KAKAO_CLIENT_ID', ' kakao-client-id ');
+    vi.stubEnv('VITE_KAKAO_REDIRECT_URI', '\thttps://example.com/oauth/kakao/callback ');
+    vi.resetModules();
+
+    const { env: fresh } = await import('./env');
+
+    expect(fresh.apiBaseUrl).toBe('https://api.example.com');
+    expect(fresh.kakaoClientId).toBe('kakao-client-id');
+    expect(fresh.kakaoRedirectUri).toBe('https://example.com/oauth/kakao/callback');
+  });
+
+  it('값이 없으면 빈 문자열이다', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', undefined);
+    vi.resetModules();
+
+    const { env: fresh } = await import('./env');
+
+    expect(fresh.apiBaseUrl).toBe('');
   });
 });
 
