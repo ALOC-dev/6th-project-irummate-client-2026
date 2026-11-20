@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 
 import { paths } from '@app/router/paths';
-import { Button, EmptyState, FilterChip, IconButton, PageHeader, Toast } from '@shared/ui';
+import { EmptyState, FilterChip, GlassCard, IconButton, PageHeader, Toast } from '@shared/ui';
 
 import { matePostFixtures } from '../model/fixtures';
 import { compareDeadlineAt, isRecruitmentOpen } from '../model/recruitmentRules';
@@ -16,8 +16,11 @@ import {
 } from '../model/types';
 import { MateComposeOverlay } from './MateComposeOverlay';
 import { MateIcon } from './MateIcon';
+import { MateCategoryIcon } from './MateCategoryIcon';
 import { MatePostCard } from './MatePostCard';
 import { MatePostSheet } from './MatePostSheet';
+
+const SORTS: Array<[MateSort, string]> = [['new', '최신순'], ['closing', '마감 임박순']];
 
 export function MateBoard() {
   const navigate = useNavigate();
@@ -36,6 +39,7 @@ export function MateBoard() {
   const visiblePosts = useMemo(() => {
     const filtered = posts.filter((post) => {
       if (!isRecruitmentOpen(post)) return false;
+      if (post.full && post.participating === 'NONE') return false;
       if (category !== 'ALL' && post.category !== category) return false;
       if (bookmarkedOnly && !post.bookmarked) return false;
       return true;
@@ -52,8 +56,19 @@ export function MateBoard() {
   };
 
   const toggleBookmark = (id: string) => {
+    const target = posts.find((post) => String(post.recruitmentId) === id);
+    if (!target) return;
     updatePost(id, (post) => ({ ...post, bookmarked: !post.bookmarked }));
+    setToast(target.bookmarked ? '즐겨찾기에서 해제했어요' : '즐겨찾기에 저장했어요');
   };
+
+  const bookmarkCount = posts.filter((post) => post.bookmarked).length;
+  const emptyTitle = bookmarkedOnly
+    ? bookmarkCount ? '이 카테고리에 저장한 글이 없어요' : '저장한 모집 글이 없어요'
+    : '조건에 맞는 모집 글이 없어요';
+  const emptyDescription = bookmarkedOnly
+    ? bookmarkCount ? '다른 카테고리를 선택하거나 즐겨찾기 필터를 꺼보세요' : '모집 카드의 북마크를 눌러 관심 있는 글을 저장해 보세요'
+    : '다른 카테고리를 선택해 보세요';
 
   const toggleJoin = (id: string) => {
     if (selectedPost?.participating === 'MINE') return;
@@ -65,9 +80,9 @@ export function MateBoard() {
         ? false
         : post.nowParticipants + 1 >= post.maxParticipants,
     }));
-    setToast(selectedPost?.participating === 'JOINED'
-      ? '참여를 취소했어요.'
-      : '참여했어요! 채팅방이 열릴 예정이에요.');
+    const leaving = selectedPost?.participating === 'JOINED';
+    closeOverlay();
+    setToast(leaving ? '참여를 취소했어요' : '참여했어요! 단체 채팅방이 열렸어요');
   };
 
   const createPost = (draft: MatePostDraft) => {
@@ -91,7 +106,7 @@ export function MateBoard() {
     };
     setPosts((current) => [post, ...current]);
     closeOverlay();
-    setToast('모집 글을 올렸어요.');
+    setToast('모집 글을 올렸어요');
   };
 
   const closeOverlay = () => {
@@ -103,65 +118,74 @@ export function MateBoard() {
     <main className="min-h-dvh pb-[var(--bottom-nav-clearance)]">
       <h2 className="sr-only">MT-01 매이트</h2>
       <PageHeader
-        title="매이트"
-        titleSize="page"
-        eyebrow="함께하면 더 즐거워요"
+        title={<img src="/brand/mate-wordmark-blue.png" alt="매이트" className="block h-[var(--wordmark-height)] w-auto" />}
         actions={(
           <>
-            <IconButton label="채팅 목록 열기" variant="ghost" onClick={() => navigate(paths.chats)}>
-              <MateIcon name="chat" className="size-5 text-blue-450" />
+            <IconButton label="검색" variant="ghost" size="sm" onClick={() => setToast('검색은 준비 중이에요')}>
+              <MateIcon name="search" className="size-[22px] text-fg-strong" />
             </IconButton>
-            <IconButton label="알림 설정 열기" variant="ghost" onClick={() => navigate(paths.notificationSettings)}>
-              <MateIcon name="bell" className="size-5 text-blue-450" />
+            <IconButton label="채팅" variant="ghost" size="sm" onClick={() => navigate(paths.chats)}>
+              <MateIcon name="chat" className="size-[22px] text-fg-brand" />
             </IconButton>
           </>
         )}
       />
 
-      <div className="mx-auto w-full max-w-[480px] px-5 pb-6 pt-5">
-        <section aria-label="매이트 카테고리">
-          <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2 [scrollbar-width:none]">
-            {mateCategories.map((item) => (
-              <FilterChip
-                key={item}
-                selected={category === item}
-                onClick={() => setCategory(item)}
+      <div className="mx-auto flex w-full max-w-[480px] flex-col gap-4 px-5 pb-6 pt-4">
+        <div className="-mx-5 -mb-9 -mt-3 flex gap-2 overflow-x-auto px-5 pb-9 pt-3 [scrollbar-width:none]" role="group" aria-label="매이트 카테고리">
+          {mateCategories.map((item) => (
+            <FilterChip
+              key={item}
+              selected={category === item}
+              leading={item === 'ALL' ? undefined : <MateCategoryIcon category={item} className="size-[18px]" />}
+              onClick={() => setCategory(item)}
+            >
+              {mateCategoryLabels[item]}
+            </FilterChip>
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-2.5">
+          <div role="tablist" aria-label="정렬" className="flex h-11 gap-1 rounded-pill bg-glass-soft p-1 ring-1 ring-inset ring-glass-edge [backdrop-filter:var(--glass-filter)]">
+            {SORTS.map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                aria-selected={sort === key}
+                className={[
+                  'flex-1 rounded-pill text-body-sm transition-[background-color,box-shadow,color] duration-[var(--duration-base)]',
+                  'focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]',
+                  sort === key ? 'bg-surface-card font-bold text-fg-brand shadow-sm' : 'font-semibold text-fg-muted',
+                ].join(' ')}
+                onClick={() => setSort(key)}
               >
-                {mateCategoryLabels[item]}
-              </FilterChip>
+                {label}
+              </button>
             ))}
           </div>
-        </section>
-
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <p className="text-body-sm font-semibold text-fg-muted">모집 글 {visiblePosts.length}개</p>
-          <div className="flex gap-2">
+          <div className="flex items-center justify-between gap-2">
+            <p className="m-0 text-[13px] font-semibold text-fg-muted">{bookmarkedOnly ? '저장한 글' : '모집 글'} {visiblePosts.length}개</p>
             <button
               type="button"
-              className={[
-                'inline-flex h-10 items-center gap-1.5 rounded-pill px-3 text-caption font-bold',
-                'focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]',
-                bookmarkedOnly ? 'bg-primary text-fg-on-brand shadow-brand' : 'bg-surface-card text-fg-body shadow-xs',
-              ].join(' ')}
               aria-pressed={bookmarkedOnly}
+              className={[
+                'inline-flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-pill px-3.5 text-[13px] font-bold',
+                'transition-[background-color,color,box-shadow] duration-[var(--duration-base)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]',
+                bookmarkedOnly
+                  ? 'bg-primary text-fg-on-brand shadow-brand'
+                  : 'bg-surface-card text-fg-body shadow-xs ring-1 ring-inset ring-glass-edge [backdrop-filter:var(--glass-filter)]',
+              ].join(' ')}
               onClick={() => setBookmarkedOnly((value) => !value)}
             >
-              <MateIcon name="bookmark" className={bookmarkedOnly ? 'size-4 fill-current' : 'size-4'} />
-              저장
-            </button>
-            <button
-              type="button"
-              className="inline-flex h-10 items-center gap-1.5 rounded-pill bg-surface-card px-3 text-caption font-bold text-fg-body shadow-xs focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
-              onClick={() => setSort((value) => value === 'new' ? 'closing' : 'new')}
-            >
-              <MateIcon name="sort" className="size-4" />
-              {sort === 'new' ? '최신순' : '마감 임박순'}
+              <MateIcon name="bookmark" className={['size-4', bookmarkedOnly ? 'fill-current' : ''].join(' ')} />
+              즐겨찾기만 보기
             </button>
           </div>
         </div>
 
         {visiblePosts.length ? (
-          <div className="mt-4 grid gap-3">
+          <div className="flex flex-col gap-3">
             {visiblePosts.map((post) => (
               <MatePostCard
                 key={post.recruitmentId}
@@ -172,27 +196,28 @@ export function MateBoard() {
             ))}
           </div>
         ) : (
-          <div className="mt-4 rounded-card bg-surface-card shadow-glass">
+          <GlassCard padding="none">
             <EmptyState
-              icon={<MateIcon name="search" className="size-6" />}
-              title={bookmarkedOnly ? '저장한 모집 글이 없어요' : '조건에 맞는 모집 글이 없어요'}
-              description={bookmarkedOnly ? '관심 있는 모집 글의 북마크를 눌러 저장해 보세요.' : '다른 카테고리를 선택해 보세요.'}
-              action={<Button variant="secondary" size="sm" onClick={() => { setCategory('ALL'); setBookmarkedOnly(false); }}>전체 모집 보기</Button>}
+              icon={<MateIcon name={bookmarkedOnly ? 'bookmark' : 'search'} className="size-[26px]" />}
+              title={emptyTitle}
+              description={emptyDescription}
             />
-          </div>
+          </GlassCard>
         )}
       </div>
 
-      <div className="pointer-events-none fixed bottom-[calc(var(--bottom-nav-clearance)+0.75rem)] left-1/2 z-30 w-full max-w-[480px] -translate-x-1/2 px-5">
-        <Button
-          size="lg"
-          className="pointer-events-auto ml-auto rounded-pill px-5"
-          onClick={() => navigate(paths.mateCompose, { state: { mateOverlay: true } })}
-        >
-          <MateIcon name="plus" className="size-5" />
-          모집하기
-        </Button>
-      </div>
+      <button
+        type="button"
+        aria-label="모집하기"
+        className={[
+          'fixed bottom-[calc(var(--bottom-nav-clearance)+12px)] right-[max(20px,calc(50vw-220px))] z-30 flex size-[62px] items-center justify-center rounded-pill',
+          'bg-primary text-fg-on-brand shadow-brand transition-transform duration-[var(--duration-fast)] active:scale-90',
+          'focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]',
+        ].join(' ')}
+        onClick={() => navigate(paths.mateCompose, { state: { mateOverlay: true } })}
+      >
+        <MateIcon name="pencil" className="size-7" />
+      </button>
 
       <MatePostSheet
         post={selectedPost}
