@@ -52,8 +52,9 @@ export function findMissingEnv(values: EnvValues, options: EnvCheckOptions): str
   if (options.isNative && !isHttpUrl(values.apiBaseUrl.trim())) missing.push('VITE_API_BASE_URL');
 
   if (!options.enableMocks) {
+    // client id는 주소가 아닌 앱 키라 빈 값만 본다. redirect uri는 카카오가 돌려보낼 주소라 http·https 주소여야 한다.
     if (!values.kakaoClientId.trim()) missing.push('VITE_KAKAO_CLIENT_ID');
-    if (!values.kakaoRedirectUri.trim()) missing.push('VITE_KAKAO_REDIRECT_URI');
+    if (!isHttpUrl(values.kakaoRedirectUri.trim())) missing.push('VITE_KAKAO_REDIRECT_URI');
   }
 
   return missing;

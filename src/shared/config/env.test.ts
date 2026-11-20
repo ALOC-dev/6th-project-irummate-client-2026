@@ -24,6 +24,10 @@ describe('findMissingEnv', () => {
     ['앱은 http 주소 허용(로컬 서버)', { apiBaseUrl: 'http://10.0.2.2:8080' }, native, []],
     ['카카오 client id가 비면 실패', { kakaoClientId: '' }, web, ['VITE_KAKAO_CLIENT_ID']],
     ['카카오 redirect uri가 비면 실패', { kakaoRedirectUri: '' }, native, ['VITE_KAKAO_REDIRECT_URI']],
+    ['카카오 redirect uri가 경로만 있으면 실패', { kakaoRedirectUri: '/oauth/kakao/callback' }, web, ['VITE_KAKAO_REDIRECT_URI']],
+    ['카카오 redirect uri에 프로토콜이 없으면 실패', { kakaoRedirectUri: 'www.example.com/cb' }, native, ['VITE_KAKAO_REDIRECT_URI']],
+    ['카카오 redirect uri는 http 허용(로컬 개발)', { kakaoRedirectUri: 'http://localhost:5173/oauth/kakao/callback' }, web, []],
+    ['카카오 client id는 주소 형식을 검사하지 않음', { kakaoClientId: 'abc123def456' }, web, []],
     ['MSW 모드는 카카오 키 생략 가능', { kakaoClientId: '', kakaoRedirectUri: '' }, webMocks, []],
     ['MSW 모드여도 앱은 API 주소 필수', { apiBaseUrl: '' }, nativeMocks, ['VITE_API_BASE_URL']],
     [
