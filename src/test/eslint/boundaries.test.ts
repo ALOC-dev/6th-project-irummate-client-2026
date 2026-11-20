@@ -9,7 +9,8 @@ import { beforeAll, describe, expect, it } from 'vitest';
 let eslint: ESLint;
 
 beforeAll(() => {
-  eslint = new ESLint({ cwd: process.cwd() });
+  // cwd는 기본값(process.cwd())을 쓴다. 앱 tsconfig에는 Node 타입이 없어 process를 직접 쓰지 않는다.
+  eslint = new ESLint();
 });
 
 async function lint(filePath: string, code: string) {
