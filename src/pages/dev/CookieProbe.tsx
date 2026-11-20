@@ -1,6 +1,8 @@
 // 임시 시험 화면. 병합하지 않고 시험이 끝나면 지운다. (재발급 쿠키 ① 기기 시험)
 import { useState } from 'react';
 
+import { apiClient, isAppError, publicClient, refreshAccessToken, registerAuthHandlers } from '@shared/api';
+import type { AuthHandlers } from '@shared/api';
 import { env } from '@shared/config/env';
 
 type Result = { label: string; text: string };
@@ -39,10 +41,94 @@ function probeSocket(): Promise<Result> {
   });
 }
 
+// ── axios 경로 시험: 앱이 실제로 쓰는 shared/api 클라이언트를 그대로 호출한다 ──
+// 토큰은 이 파일의 메모리 변수에만 둔다. 화면에는 값을 찍지 않고 있음/없음만 보인다.
+let memToken: string | null = null;
+let refreshedCount = 0;
+let expiredCount = 0;
+
+// app/main.tsx가 이 모듈을 불러온 뒤 실제 앱의 보관함을 등록해 덮어쓰므로, 버튼을 누를 때마다 다시 등록한다.
+const probeHandlers: AuthHandlers = {
+  getAccessToken: () => memToken,
+  setAccessToken: (token) => {
+    memToken = token;
+  },
+  clearAccessToken: () => {
+    memToken = null;
+  },
+  onAuthExpired: () => {
+    expiredCount += 1;
+  },
+  onTokenRefreshed: () => {
+    refreshedCount += 1;
+  },
+};
+
+function activateProbeHandlers(): void {
+  registerAuthHandlers(probeHandlers);
+}
+
+function describeError(error: unknown): string {
+  if (isAppError(error)) return `실패 kind=${error.kind} status=${error.status ?? '-'}`;
+  return `실패 ${error instanceof Error ? error.name : 'unknown'}`;
+}
+
+async function axiosExchange(code: string): Promise<Result> {
+  activateProbeHandlers();
+  try {
+    const res = await publicClient.get<{ data?: { accessToken?: string } }>('/api/auth/kakao/callback', {
+      params: { code },
+    });
+    const token = res.data?.data?.accessToken;
+    if (token) memToken = token;
+    return { label: 'axios 교환', text: `status=${res.status} accessToken=${token ? '있음' : '없음'}` };
+  } catch (error) {
+    return { label: 'axios 교환', text: describeError(error) };
+  }
+}
+
+async function axiosRefresh(): Promise<Result> {
+  activateProbeHandlers();
+  try {
+    const token = await refreshAccessToken();
+    return { label: 'axios 재발급', text: `성공 accessToken=${token ? '있음' : '없음'}` };
+  } catch (error) {
+    return { label: 'axios 재발급', text: describeError(error) };
+  }
+}
+
+// 틀린 토큰으로 인증이 필요한 API를 불러 401 → 재발급 → 재시도가 이어지는지 본다.
+// 빌드 도구가 비교를 미리 계산하지 못하도록 값 읽기를 함수로 분리한다.
+function readMemToken(): string | null {
+  return memToken;
+}
+
+async function axios401Retry(): Promise<Result> {
+  activateProbeHandlers();
+  const sentinel = 'invalid-token-for-probe';
+  memToken = sentinel;
+  const refreshedBefore = refreshedCount;
+  const expiredBefore = expiredCount;
+  try {
+    const res = await apiClient.get('/api/users/me');
+    const after = readMemToken();
+    const state = after === null ? '없음' : after === sentinel ? '그대로(틀린 값)' : '새 토큰';
+    return {
+      label: 'axios 401 재시도',
+      text: `최종 status=${res.status} 재발급횟수=${refreshedCount - refreshedBefore} 만료알림=${expiredCount - expiredBefore} 저장된토큰=${state}`,
+    };
+  } catch (error) {
+    return {
+      label: 'axios 401 재시도',
+      text: `${describeError(error)} 재발급횟수=${refreshedCount - refreshedBefore} 만료알림=${expiredCount - expiredBefore}`,
+    };
+  }
+}
+
 export default function CookieProbe() {
   const [code, setCode] = useState('');
   const [results, setResults] = useState<Result[]>([]);
-  const add = (r: Result) => setResults((prev) => [r, ...prev].slice(0, 8));
+  const add = (r: Result) => setResults((prev) => [r, ...prev].slice(0, 10));
 
   return (
     <div style={{ padding: 16, paddingTop: 48 }}>
@@ -62,6 +148,9 @@ export default function CookieProbe() {
           3. 쿠키 읽기(refreshToken이 안 보여야 통과)
         </button>
         <button onClick={() => void probeSocket().then(add)}>4. 소켓 연결(/ws/chat)</button>
+        <button onClick={() => void axiosExchange(code).then(add)}>5. axios 로그인 교환(code 필요)</button>
+        <button onClick={() => void axiosRefresh().then(add)}>6. axios 재발급</button>
+        <button onClick={() => void axios401Retry().then(add)}>7. axios 401 재시도(/api/users/me)</button>
       </div>
       <pre style={{ whiteSpace: 'pre-wrap', marginTop: 16 }}>
         {results.map((r) => `[${r.label}] ${r.text}`).join('\n')}
