@@ -18,3 +18,11 @@ describe('PageHeader', () => {
     expect(screen.getByText('현재 접속 중')).toBeInTheDocument();
   });
 });
+
+describe('PageHeader align', () => {
+  it('center면 제목을 가운데 두고 비어 있는 쪽에도 같은 너비 자리를 둔다', () => {
+    const { container } = render(<PageHeader title="알림 설정" align="center" leading={<button type="button">뒤로</button>} />);
+    expect(screen.getByRole('heading', { name: '알림 설정' }).parentElement).toHaveClass('text-center');
+    expect(container.querySelectorAll('.min-w-11')).toHaveLength(2);
+  });
+});
