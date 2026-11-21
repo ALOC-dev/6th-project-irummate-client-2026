@@ -14,6 +14,7 @@ export const paths = {
     certification: '/onboarding/certification',
   },
   home: '/home',
+  notifications: '/notifications',
   match: '/match',
   mateProfile: (mateId: string) => `/match/mates/${encodeURIComponent(mateId)}`,
   matchResult: (mateId: string) => `/match/mates/${encodeURIComponent(mateId)}/result`,
