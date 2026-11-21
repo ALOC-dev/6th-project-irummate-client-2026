@@ -16,15 +16,18 @@ import {
   GlassCard,
   IconButton,
   PageHeader,
+  Switch,
   TextField,
   Toast,
   type IconButtonProps,
+  type SwitchProps,
   type TextFieldProps,
 } from '@shared/ui';
 
 describe('계약', () => {
   it('paths', () => {
     expectTypeOf(paths.home).toEqualTypeOf<'/home'>();
+    expectTypeOf(paths.notifications).toEqualTypeOf<'/notifications'>();
     expectTypeOf(paths.chatRoom).toEqualTypeOf<(roomId: string) => string>();
     expectTypeOf(paths.matePost).parameter(0).toBeString();
   });
@@ -67,9 +70,11 @@ describe('계약', () => {
     expectTypeOf(GlassCard).toBeFunction();
     expectTypeOf(IconButton).toBeFunction();
     expectTypeOf(PageHeader).toBeFunction();
+    expectTypeOf(Switch).toBeFunction();
     expectTypeOf(TextField).toBeFunction();
     expectTypeOf(Toast).toBeFunction();
     expectTypeOf<IconButtonProps['label']>().toBeString();
     expectTypeOf<TextFieldProps['label']>().toBeString();
+    expectTypeOf<SwitchProps['onCheckedChange']>().toEqualTypeOf<(checked: boolean) => void>();
   });
 });

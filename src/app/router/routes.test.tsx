@@ -13,7 +13,7 @@ const anonymous: SessionScenario = { session: 'anonymous' };
 const certified: SessionScenario = { session: 'certified' };
 const onboarding = (stage: 'terms' | 'intro' | 'profile' | 'certification'): SessionScenario => ({ session: 'onboarding', stage });
 
-// 화면 18개: [경로, 시나리오, 화면 ID]
+// 화면 19개: [경로, 시나리오, 화면 ID]
 const screens: Array<[string, SessionScenario, string]> = [
   [paths.login, anonymous, 'ON-01'],
   [paths.kakaoCallback, anonymous, 'ON-00'],
@@ -22,6 +22,7 @@ const screens: Array<[string, SessionScenario, string]> = [
   [paths.onboarding.profile, onboarding('profile'), 'ON-04'],
   [paths.onboarding.certification, onboarding('certification'), 'ON-05'],
   [paths.home, certified, 'HM-01'],
+  [paths.notifications, certified, 'HM-02'],
   [paths.match, certified, 'MC-01'],
   [paths.mateProfile('7'), certified, 'MC-02'],
   [paths.matchResult('7'), certified, 'MC-03'],

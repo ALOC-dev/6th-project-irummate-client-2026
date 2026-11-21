@@ -1,7 +1,9 @@
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router';
+import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { paths } from '@app/router/paths';
 
 import { DormHomeView } from './DormHomeView';
 
@@ -65,5 +67,15 @@ describe('DormHomeView', () => {
     renderHome();
     await userEvent.click(screen.getByRole('button', { name: /^최신 공지:/ }));
     expect(screen.getByRole('status')).toHaveTextContent('원문 페이지로 이동해요');
+  });
+
+  it('알림 버튼은 알림 목록으로 이동한다', async () => {
+    const router = createMemoryRouter([
+      { path: paths.home, element: <DormHomeView today={today} /> },
+      { path: paths.notifications, element: <h1>알림 목록</h1> },
+    ], { initialEntries: [paths.home] });
+    render(<RouterProvider router={router} />);
+    await userEvent.click(screen.getByRole('button', { name: '알림' }));
+    expect(router.state.location.pathname).toBe(paths.notifications);
   });
 });

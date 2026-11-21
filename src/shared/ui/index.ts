@@ -22,3 +22,5 @@ export { Avatar } from './Avatar/Avatar';
 export type { AvatarProps, AvatarTone } from './Avatar/Avatar';
 export { BrandIcon } from './BrandIcon/BrandIcon';
 export type { BrandIconName, BrandIconProps } from './BrandIcon/BrandIcon';
+export { Switch } from './Switch/Switch';
+export type { SwitchProps } from './Switch/Switch';

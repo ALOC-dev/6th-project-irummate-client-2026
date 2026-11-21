@@ -75,6 +75,7 @@ const userRoute: RouteObject = {
           children: [
             { path: routePatterns.mateProfile, lazy: page(() => import('@pages/match/MateProfilePage')) },
             { path: routePatterns.matchResult, lazy: page(() => import('@pages/match/MatchResultPage')) },
+            { path: paths.notifications, lazy: page(() => import('@pages/home/NotificationListPage')) },
             { path: paths.chats, lazy: page(() => import('@pages/chat/ChatListPage')) },
             { path: routePatterns.chatRoom, lazy: page(() => import('@pages/chat/ChatRoomPage')) },
             { path: paths.survey, lazy: page(() => import('@pages/my/SurveyEditPage')) },

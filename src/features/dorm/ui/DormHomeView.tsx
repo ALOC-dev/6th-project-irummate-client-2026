@@ -53,7 +53,7 @@ export function DormHomeView({ roomLabel = '408호', today = new Date() }: DormH
             <IconButton label="채팅" variant="ghost" size="sm" onClick={() => navigate(paths.chats)}>
               <DormIcon name="chat" className="size-[22px] text-fg-brand" />
             </IconButton>
-            <IconButton label="알림" variant="ghost" size="sm" className="relative" onClick={() => navigate(paths.notificationSettings)}>
+            <IconButton label="알림" variant="ghost" size="sm" className="relative" onClick={() => navigate(paths.notifications)}>
               <DormIcon name="bell" className="size-[22px] text-fg-brand" />
               <span aria-hidden="true" className="absolute right-[9px] top-[9px] size-2 rounded-pill bg-danger ring-2 ring-fg-on-brand" />
             </IconButton>
