@@ -53,7 +53,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       // 토큰만 바뀌었고 사용자는 그대로다.
       commitTokenRefreshed: () => {},
-      commitUnauthenticated: () => setState(anonymous),
+      // 비로그인으로 바꿀 때는 접근 토큰도 항상 비운다. 상태 확인이 401이 아닌 4xx(예: 403)로 실패해도 토큰이 남지 않는다.
+      commitUnauthenticated: () => {
+        tokenStorage.clear();
+        setState(anonymous);
+      },
       commitBootstrapFailed: (error) => {
         const startError = startErrorOf(error);
         setState(startError ? { ...loading, startError } : anonymous);
