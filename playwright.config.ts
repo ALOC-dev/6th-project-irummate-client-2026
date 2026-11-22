@@ -6,6 +6,8 @@ export default defineConfig({
   fullyParallel: true,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? 'github' : 'list',
+  // 개발 서버는 화면 파일을 처음 요청받을 때 변환한다. 여러 테스트가 동시에 첫 화면을 열면 기본값 5초를 넘길 수 있다.
+  expect: { timeout: 10_000 },
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',

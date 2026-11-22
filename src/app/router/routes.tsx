@@ -4,6 +4,7 @@ import { Navigate, type RouteObject } from 'react-router';
 import type { BuildTarget } from '@shared/config/env';
 
 import { OnboardingLayout } from '../layouts/OnboardingLayout';
+import { RouteErrorBoundary } from '../providers/RouteErrorBoundary';
 import { StackLayout } from '../layouts/StackLayout';
 import { TabLayout } from '../layouts/TabLayout';
 import { EntryRedirect } from './EntryRedirect';
@@ -91,9 +92,16 @@ const userRoute: RouteObject = {
 
 const fallbackRoute: RouteObject = { path: '*', element: <Navigate to={paths.entry} replace /> };
 
+// 화면을 그리다 생긴 예외·화면 파일을 받지 못한 경우는 가장 가까운 라우트 오류 화면이 잡는다.
+// 가장 바깥 라우트마다 두어, 하위 화면 어디서 나든 흰 화면이 되지 않게 한다.
+const withErrorBoundary = (route: RouteObject): RouteObject => ({ ...route, errorElement: <RouteErrorBoundary /> });
+
 // 빌드 대상에 따라 등록할 라우트를 고른다. 관리자 웹은 로그인·카카오 콜백·관리자 화면만 둔다.
 export function createRoutes(target: BuildTarget): RouteObject[] {
   const entryRoute: RouteObject = { path: paths.entry, element: <EntryRedirect target={target} /> };
-  if (target === 'admin-web') return [entryRoute, ...publicRoutes, adminRoute, fallbackRoute];
-  return [entryRoute, ...publicRoutes, userRoute, adminRoute, fallbackRoute];
+  const routes =
+    target === 'admin-web'
+      ? [entryRoute, ...publicRoutes, adminRoute, fallbackRoute]
+      : [entryRoute, ...publicRoutes, userRoute, adminRoute, fallbackRoute];
+  return routes.map(withErrorBoundary);
 }
