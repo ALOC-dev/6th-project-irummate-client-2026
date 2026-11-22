@@ -1,11 +1,13 @@
-// 세션 시나리오 3종. 개발 서버 주소의 ?session=anonymous|onboarding|certified로 고른다.
+// 세션 시나리오 4종. 개발 서버 주소의 ?session=anonymous|onboarding|pending|certified로 고른다.
 // onboarding은 &stage=terms|intro|profile|certification으로 세부 단계를 고른다(기본 terms).
+// pending은 인증 심사 중이다(매칭·채팅의 심사 중 안내 확인용).
 // 아무것도 붙이지 않으면 certified라 uukdo는 평소 그대로 개발하면 된다. 관리자(admin)는 나중에 더한다.
 export type OnboardingStep = 'terms' | 'intro' | 'profile' | 'certification';
 
 export type SessionScenario =
   | { session: 'anonymous' }
   | { session: 'onboarding'; stage: OnboardingStep }
+  | { session: 'pending' }
   | { session: 'certified' };
 
 const STORAGE_KEY = 'msw.session';
@@ -15,7 +17,7 @@ const STEPS: readonly OnboardingStep[] = ['terms', 'intro', 'profile', 'certific
 let current: SessionScenario | null = null;
 
 function parse(session: string | null, stage: string | null): SessionScenario | null {
-  if (session === 'anonymous' || session === 'certified') return { session };
+  if (session === 'anonymous' || session === 'pending' || session === 'certified') return { session };
   if (session === 'onboarding') return { session, stage: STEPS.find((s) => s === stage) ?? 'terms' };
   return null;
 }

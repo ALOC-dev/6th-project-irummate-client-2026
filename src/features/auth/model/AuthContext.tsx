@@ -7,7 +7,9 @@ import type { OnboardingStage, Session, SessionUser } from './types';
 
 export const AuthContext = createContext<Session | null>(null);
 
-const STAGES: readonly OnboardingStage[] = ['login', 'terms', 'intro', 'profile', 'certification', 'certified', 'admin'];
+const STAGES: readonly OnboardingStage[] = [
+  'login', 'terms', 'intro', 'profile', 'certification', 'pending', 'certified', 'admin',
+];
 
 // 임시: MSW 세션 응답이 계약의 세션 사용자 모양을 그대로 준다.
 // 나중에 서버 응답 모양 → sessionUser 변환 + onboardingStage 판정으로 바꾼다.
