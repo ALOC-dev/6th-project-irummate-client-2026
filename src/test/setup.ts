@@ -55,5 +55,7 @@ afterEach(() => {
   resetSessionScenario();
   // 접근 토큰은 모듈 메모리에 있어 테스트 사이에 남는다. 앱을 새로 연 것처럼 비운다.
   authClientBindings.clearAccessToken();
+  // 로그인 state·가려던 경로 같은 탭 단위 값도 테스트마다 비운다.
+  if (typeof window !== 'undefined') window.sessionStorage.clear();
 });
 afterAll(() => server.close());
