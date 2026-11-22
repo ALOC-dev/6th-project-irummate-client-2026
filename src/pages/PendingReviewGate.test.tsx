@@ -30,15 +30,19 @@ describe('인증 심사 중 안내', () => {
     expect(screen.queryByRole('button', { name: '뒤로' }) !== null).toBe(back);
   });
 
-  it('요청을 보냈다는 표시 뒤에 확인 중 표시로 넘어간다', async () => {
+  it('잠시 뒤 확인 중 표시로 넘어간다', async () => {
+    // 가짜 시계가 실제 시간과 함께 흘러서(shouldAdvanceTime), 느린 CI에서는 첫 화면을 확인하기 전에 이미 넘어갈 수 있다.
+    // 그래서 처음 상태는 확인하지 않고, 바뀔 때까지 시계를 조금씩 넘기며 기다린다.
     vi.useFakeTimers({ shouldAdvanceTime: true });
     setSessionScenario({ session: 'pending' });
     renderWithProviders({ route: paths.match });
-    const status = await screen.findByRole('status');
-    expect(screen.getByText('인증 요청을 보냈어요').closest('p')).toHaveAttribute('aria-hidden', 'false');
-    act(() => { vi.advanceTimersByTime(1200); });
-    expect(screen.getByText('운영팀이 확인하고 있어요').closest('p')).toHaveAttribute('aria-hidden', 'false');
-    expect(status).toHaveTextContent('운영팀이 확인하고 있어요');
+    await screen.findByRole('status');
+    expect(screen.getByText('인증 요청을 보냈어요')).toBeInTheDocument();
+    await vi.waitFor(() => {
+      act(() => { vi.advanceTimersByTime(300); });
+      expect(screen.getByText('운영팀이 확인하고 있어요').closest('p')).toHaveAttribute('aria-hidden', 'false');
+    });
+    expect(screen.getByRole('status')).toHaveTextContent('운영팀이 확인하고 있어요');
   });
 
   it('인증을 마쳤으면 안내 없이 원래 화면을 보여준다', async () => {
