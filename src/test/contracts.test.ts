@@ -34,7 +34,7 @@ describe('계약', () => {
 
   it('features/auth', () => {
     expectTypeOf<OnboardingStage>()
-      .toEqualTypeOf<'login' | 'terms' | 'intro' | 'profile' | 'certification' | 'certified' | 'admin'>();
+      .toEqualTypeOf<'login' | 'terms' | 'intro' | 'profile' | 'certification' | 'pending' | 'certified' | 'admin'>();
     expectTypeOf<SessionUser>()
       .toEqualTypeOf<{ id: number; name: string; dormRoom: string | null; stage: OnboardingStage }>();
     expectTypeOf(useSession).returns.toEqualTypeOf<{

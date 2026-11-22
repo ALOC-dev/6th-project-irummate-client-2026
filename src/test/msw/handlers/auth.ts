@@ -10,6 +10,7 @@ function currentUser(): SessionUser | null {
   const scenario = getSessionScenario();
   if (scenario.session === 'anonymous') return null;
   if (scenario.session === 'onboarding') return { ...sessionUserBase, dormRoom: null, stage: scenario.stage };
+  if (scenario.session === 'pending') return { ...sessionUserBase, dormRoom: null, stage: 'pending' };
   return { ...sessionUserBase, dormRoom: certifiedDormRoom, stage: 'certified' };
 }
 

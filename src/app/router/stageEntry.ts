@@ -11,6 +11,7 @@ const STAGE_ENTRY: Record<OnboardingStage, string> = {
   intro: paths.onboarding.intro,
   profile: paths.onboarding.profile,
   certification: paths.onboarding.certification,
+  pending: paths.home,
   certified: paths.home,
   admin: paths.admin.home,
 };
