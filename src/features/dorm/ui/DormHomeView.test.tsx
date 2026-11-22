@@ -29,6 +29,12 @@ describe('DormHomeView', () => {
     expect(screen.getByRole('heading', { name: '2026년 11월' })).toBeInTheDocument();
   });
 
+  it('호실을 모르면 호실 없이 생활관만 보여준다', () => {
+    renderHome();
+    expect(screen.getByText('생활관')).toBeInTheDocument();
+    expect(screen.queryByText(/생활관 ·/)).not.toBeInTheDocument();
+  });
+
   it('오늘 일정이 없으면 다음 일정을 안내한다', () => {
     renderHome();
     expect(screen.getByText('11월 17일 · 오늘')).toBeInTheDocument();
