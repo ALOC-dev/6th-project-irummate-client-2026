@@ -18,8 +18,9 @@ export function getOnboardingStage(user: AuthStatusUser | null, progress: Onboar
   if (user.role === 'ADMIN') return 'admin';
   // 3. 이번 학기 인증 승인 → 앱 전체. 가입 단계보다 먼저 봐서, 다른 기기에서 로그인해도 가입 화면이 다시 나오지 않는다.
   if (user.certificationStatus === 'APPROVED') return 'certified';
-  // 4. 약관 미동의. 서버에 동의 필드가 없어 임시로 "기본 정보를 냈으면 동의한 것"으로 본다.
-  if (!user.detailsCompleted && !progress.termsAgreedInSession) return 'terms';
+  // 4. 약관 미동의. 서버가 동의 필드를 주면 그 값을, 주지 않으면 임시로 "기본 정보를 냈거나 이번 실행 중 동의함"을 본다.
+  const termsAgreed = user.termsAgreed ?? (user.detailsCompleted || progress.termsAgreedInSession);
+  if (!termsAgreed) return 'terms';
   // 5. 소개 미완료
   if (!progress.introCompleted) return 'intro';
   // 6. 기본 정보 미입력

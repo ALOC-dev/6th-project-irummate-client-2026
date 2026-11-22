@@ -2,6 +2,11 @@
 // onboarding은 &stage=terms|intro|profile|certification으로 세부 단계를 고른다(기본 terms).
 // pending은 인증 심사 중이다(매칭·채팅의 심사 중 안내 확인용).
 // 아무것도 붙이지 않으면 certified라 uukdo는 평소 그대로 개발하면 된다. 관리자(admin)는 나중에 더한다.
+// 서버 값은 handlers/auth.ts가 만들고, 서버가 모르는 소개 완료 표시는 여기서 채운다.
+import { introProgress } from '@features/auth';
+
+import { mswUserId } from '../fixtures/session';
+
 export type OnboardingStep = 'terms' | 'intro' | 'profile' | 'certification';
 
 export type SessionScenario =
@@ -45,8 +50,18 @@ export function getSessionScenario(): SessionScenario {
   return current ?? readStored() ?? DEFAULT_SCENARIO;
 }
 
+// 소개 다음 단계(profile·certification)와 심사 중은 소개를 본 사용자다.
+function applyIntroProgress(scenario: SessionScenario | null): void {
+  const introDone =
+    scenario?.session === 'pending' ||
+    (scenario?.session === 'onboarding' && (scenario.stage === 'profile' || scenario.stage === 'certification'));
+  if (introDone) introProgress.markCompleted(mswUserId);
+  else introProgress.clear(mswUserId);
+}
+
 export function setSessionScenario(scenario: SessionScenario): void {
   current = scenario;
+  applyIntroProgress(scenario);
   try {
     window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(scenario));
   } catch {
@@ -56,6 +71,7 @@ export function setSessionScenario(scenario: SessionScenario): void {
 
 export function resetSessionScenario(): void {
   current = null;
+  applyIntroProgress(null);
   try {
     window.sessionStorage.removeItem(STORAGE_KEY);
   } catch {

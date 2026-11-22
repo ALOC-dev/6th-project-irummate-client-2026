@@ -1,17 +1,28 @@
 import { http } from 'msw';
 
-import type { SessionUser } from '@features/auth';
-
-import { certifiedDormRoom, mswAccessToken, sessionUserBase } from '../fixtures/session';
-import { getSessionScenario } from '../scenarios/session';
+import { mswAccessToken, serverUserBase } from '../fixtures/session';
+import { getSessionScenario, type SessionScenario } from '../scenarios/session';
 import { fail, ok } from './envelope';
 
-function currentUser(): SessionUser | null {
-  const scenario = getSessionScenario();
-  if (scenario.session === 'anonymous') return null;
-  if (scenario.session === 'onboarding') return { ...sessionUserBase, dormRoom: null, stage: scenario.stage };
-  if (scenario.session === 'pending') return { ...sessionUserBase, dormRoom: null, stage: 'pending' };
-  return { ...sessionUserBase, dormRoom: certifiedDormRoom, stage: 'certified' };
+// 시나리오 → 서버 user 필드. 단계는 클라이언트의 판정 함수가 이 값으로 정한다.
+// termsAgreed는 2학기 서버에 아직 없는 필드다. 약관 이후 단계를 흉내 내려고 MSW만 미리 보낸다(ADR 0004).
+// 소개 완료 표시는 서버가 모르는 기기 값이라 시나리오가 따로 채운다(scenarios/session.ts).
+function serverUser(scenario: Exclude<SessionScenario, { session: 'anonymous' }>) {
+  if (scenario.session === 'certified') {
+    return { ...serverUserBase, detailsCompleted: true, certificationStatus: 'APPROVED' };
+  }
+  if (scenario.session === 'pending') {
+    return { ...serverUserBase, detailsCompleted: true, certificationStatus: 'PENDING' };
+  }
+  switch (scenario.stage) {
+    case 'terms':
+      return { ...serverUserBase, termsAgreed: false };
+    case 'intro':
+    case 'profile':
+      return { ...serverUserBase, termsAgreed: true };
+    case 'certification':
+      return { ...serverUserBase, detailsCompleted: true };
+  }
 }
 
 interface AuthHandlerOptions {
@@ -19,19 +30,24 @@ interface AuthHandlerOptions {
   refresh?: 'ok' | 'fail';
 }
 
-// 인증 API 흉내: 재발급·상태 조회·카카오 코드 교환·로그아웃·탈퇴 (1학기 경로)
+// 인증 API 흉내: 재발급·상태 조회·카카오 코드 교환·로그아웃·탈퇴 (2학기 서버 경로·응답 모양)
 export function createAuthHandlers({ refresh = 'ok' }: AuthHandlerOptions = {}) {
   return [
     http.post('*/api/auth/refresh', () => {
-      if (refresh === 'fail' || !currentUser()) return fail(401, 'UNAUTHORIZED', '다시 로그인해 주세요.');
-      return ok({ accessToken: mswAccessToken });
+      // 비로그인은 재발급 쿠키가 없는 상태라 401이다.
+      if (refresh === 'fail' || getSessionScenario().session === 'anonymous') {
+        return fail(401, 'UNAUTHORIZED', '다시 로그인해 주세요.');
+      }
+      return ok({ accessToken: mswAccessToken, tokenType: 'Bearer' });
     }),
     http.get('*/api/auth/status', ({ request }) => {
-      const user = currentUser();
-      if (!user || request.headers.get('Authorization') !== `Bearer ${mswAccessToken}`) {
+      if (request.headers.get('Authorization') !== `Bearer ${mswAccessToken}`) {
         return fail(401, 'UNAUTHORIZED', '로그인이 필요합니다.');
       }
-      return ok(user);
+      const scenario = getSessionScenario();
+      // 서버와 같이 비로그인은 200 + authenticated: false
+      if (scenario.session === 'anonymous') return ok({ authenticated: false, user: null });
+      return ok({ authenticated: true, user: serverUser(scenario) });
     }),
     http.get('*/api/auth/kakao/callback', () => ok({ accessToken: mswAccessToken })),
     http.post('*/api/auth/logout', () => ok(null)),

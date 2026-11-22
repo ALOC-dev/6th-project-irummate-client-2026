@@ -36,10 +36,12 @@ describe('계약', () => {
     expectTypeOf<OnboardingStage>()
       .toEqualTypeOf<'login' | 'terms' | 'intro' | 'profile' | 'certification' | 'pending' | 'certified' | 'admin'>();
     expectTypeOf<SessionUser>()
-      .toEqualTypeOf<{ id: number; name: string; dormRoom: string | null; stage: OnboardingStage }>();
+      .toEqualTypeOf<{ id: string; nickname: string; dormRoom: string | null; stage: OnboardingStage }>();
     expectTypeOf(useSession).returns.toEqualTypeOf<{
       status: 'loading' | 'authenticated' | 'anonymous';
       user: SessionUser | null;
+      startError?: 'network' | 'server';
+      retry?: () => void;
     }>();
     expectTypeOf(getAccessToken).returns.toEqualTypeOf<Promise<string | null>>();
   });
