@@ -74,7 +74,7 @@ export function MatePostCard({ post, onOpen, onBookmark }: MatePostCardProps) {
         </div>
         <div className="mt-2 flex items-center gap-2.5">
           <div
-            className="h-1.5 flex-1 overflow-hidden rounded-pill bg-ink-100"
+            className="h-2.5 flex-1 overflow-hidden rounded-pill bg-ink-100"
             role="progressbar"
             aria-label="모집 인원"
             aria-valuemin={0}
