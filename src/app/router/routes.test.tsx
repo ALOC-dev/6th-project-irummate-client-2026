@@ -2,6 +2,7 @@ import { screen } from '@testing-library/react';
 import { http } from 'msw';
 import { describe, expect, it } from 'vitest';
 
+import { serverUserBase } from '@test/msw/fixtures/session';
 import { ok } from '@test/msw/handlers/envelope';
 import { setSessionScenario, type SessionScenario } from '@test/msw/scenarios/session';
 import { server } from '@test/msw/server';
@@ -36,8 +37,13 @@ const screens: Array<[string, SessionScenario, string]> = [
   [paths.notificationSettings, certified, 'MY-05'],
 ];
 
+// 서버 인증 상태 응답 모양의 관리자. 관리자 시나리오는 나중에 scenarios/session.ts에 더한다.
 function useAdminSession() {
-  server.use(http.get('*/api/auth/status', () => ok({ id: 9, name: '관리자', dormRoom: null, stage: 'admin' })));
+  server.use(
+    http.get('*/api/auth/status', () =>
+      ok({ authenticated: true, user: { ...serverUserBase, id: 'msw-admin-1', nickname: '관리자', role: 'ADMIN' } }),
+    ),
+  );
 }
 
 describe('라우트 골격 (앱)', () => {

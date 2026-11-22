@@ -19,6 +19,9 @@ export interface AuthStatusUser {
   certificationStatus: CertificationStatus;
   detailsCompleted: boolean;
   surveyCompleted: boolean;
+  // 필수 약관 동의 여부. 2학기 서버에는 아직 없는 필드라 서버가 주지 않으면 null(ADR 0004 결정 2).
+  // MSW는 이 필드를 미리 보내 약관 이후 단계를 흉내 낸다. 백엔드가 추가할 때 이름을 맞춘다.
+  termsAgreed: boolean | null;
 }
 
 const ROLES: readonly UserRole[] = ['USER', 'ADMIN'];
@@ -33,7 +36,7 @@ function pick<T extends string>(allowed: readonly T[], value: unknown): T | null
 // 빠진 완료 표시는 "미완료"(false), 빠지거나 모르는 인증 상태는 "요청 없음"(NONE)으로 본다.
 export function readAuthStatus(raw: unknown): AuthStatusUser | null {
   if (!raw || typeof raw !== 'object') return null;
-  const { authenticated, user } = raw as AuthStatusResponse;
+  const { authenticated, user } = raw as AuthStatusResponse & { user?: { termsAgreed?: unknown } };
   if (authenticated !== true || !user || typeof user !== 'object') return null;
   if (typeof user.id !== 'string' || !user.id) return null;
 
@@ -45,5 +48,6 @@ export function readAuthStatus(raw: unknown): AuthStatusUser | null {
     certificationStatus: pick(CERTIFICATION_STATUSES, user.certificationStatus) ?? 'NONE',
     detailsCompleted: user.detailsCompleted === true,
     surveyCompleted: user.surveyCompleted === true,
+    termsAgreed: typeof user.termsAgreed === 'boolean' ? user.termsAgreed : null,
   };
 }

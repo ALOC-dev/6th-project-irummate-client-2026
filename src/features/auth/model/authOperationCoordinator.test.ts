@@ -129,6 +129,38 @@ describe('authOperationCoordinator', () => {
     expect(harness.commits).toEqual([{ state: 'unauthenticated' }]);
   });
 
+  it('시작 시 상태 확인 실패는 commitBootstrapFailed가 오류를 받아 처리한다(2학기 추가)', async () => {
+    const networkError = new Error('offline');
+    const failures: unknown[] = [];
+    const commits: string[] = [];
+    const coordinator = createAuthOperationCoordinator<TestUser>({
+      commitAuthenticated: () => commits.push('authenticated'),
+      commitTokenRefreshed: () => commits.push('token-refreshed'),
+      commitUnauthenticated: () => commits.push('unauthenticated'),
+      commitBootstrapFailed: (error) => failures.push(error),
+      loadCurrentUser: async () => {
+        throw networkError;
+      },
+      removeAccessToken: () => {},
+      setAccessToken: () => {},
+    });
+
+    await expect(coordinator.bootstrap()).rejects.toBe(networkError);
+
+    expect(failures).toEqual([networkError]);
+    expect(commits).toEqual([]);
+  });
+
+  it('commitBootstrapFailed가 없으면 1학기와 같이 비로그인으로 둔다', async () => {
+    const harness = createHarness(async () => {
+      throw new Error('status request failed');
+    });
+
+    await expect(harness.coordinator.bootstrap()).rejects.toThrow('status request failed');
+
+    expect(harness.commits).toEqual([{ state: 'unauthenticated' }]);
+  });
+
   it('로그인을 시작한 뒤에는 상태 확인이 새로 시작되지 않는다', async () => {
     const loginUser = createDeferred<TestUser>();
     let loadCount = 0;
