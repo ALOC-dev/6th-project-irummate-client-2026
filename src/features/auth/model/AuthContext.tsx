@@ -5,13 +5,23 @@ import { isAppError, refreshAccessToken } from '@shared/api';
 import { fetchAuthStatus } from '../api/authApi';
 import { createAuthOperationCoordinator } from './authOperationCoordinator';
 import { authEvents } from './authEvents';
-import { readOnboardingProgress } from './onboardingProgress';
+import { readOnboardingProgress, termsProgress } from './onboardingProgress';
 import { getOnboardingStage } from './onboardingStage';
 import { toSessionUser } from './sessionUser';
 import { tokenStorage } from './tokenStorage';
 import type { Session, SessionStartError, SessionUser } from './types';
 
 export const AuthContext = createContext<Session | null>(null);
+
+// 세션을 바꾸는 동작. 같은 feature의 훅(로그인·콜백·로그아웃·탈퇴)만 쓰고 index.ts로 공개하지 않는다.
+export interface AuthActions {
+  // 카카오 코드 교환으로 받은 접근 토큰을 넣고 사용자를 확인한다. 확인한 사용자를 돌려준다.
+  completeLogin(accessToken: string): Promise<SessionUser>;
+  // 이 기기의 로그인 정보(메모리 토큰, 이번 실행의 약관 동의)를 지우고 비로그인으로 둔다. 서버 요청은 하지 않는다.
+  signOut(): void;
+}
+
+export const AuthActionsContext = createContext<AuthActions | null>(null);
 
 type SessionState = Pick<Session, 'status' | 'user' | 'startError'>;
 
@@ -93,6 +103,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => (state.startError ? { ...state, retry } : { status: state.status, user: state.user }),
     [state, retry],
   );
-  // 로그인 완료(coordinator.completeLogin)는 다음 작업의 로그인 훅에서 같은 feature 안의 Context로 연결한다.
-  return <AuthContext.Provider value={session}>{children}</AuthContext.Provider>;
+  const actions = useMemo<AuthActions>(
+    () => ({
+      completeLogin: (accessToken) => coordinator.completeLogin(accessToken),
+      signOut: () => {
+        tokenStorage.clear();
+        termsProgress.clear();
+        // 진행 중이던 상태 확인이 늦게 끝나도 로그인 상태로 되돌리지 못하게 한다.
+        coordinator.handleAuthExpired();
+      },
+    }),
+    [coordinator],
+  );
+
+  return (
+    <AuthActionsContext.Provider value={actions}>
+      <AuthContext.Provider value={session}>{children}</AuthContext.Provider>
+    </AuthActionsContext.Provider>
+  );
 }
