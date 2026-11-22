@@ -28,11 +28,12 @@ async function loadSessionUser(): Promise<SessionUser | null> {
   return toSessionUser(user, getOnboardingStage(user, readOnboardingProgress(user.id)));
 }
 
-// 로그인 여부와 상관없는 실패(연결 끊김, 서버 오류)만 고른다. 이때는 로그아웃하지 않고 다시 시도를 기다린다.
+// 로그인 여부와 상관없는 실패(연결 끊김, 서버 오류, 요청 한도 초과)만 고른다. 이때는 로그아웃하지 않고 다시 시도를 기다린다.
+// 429는 다시 로그인해도 같은 제한에 걸리므로 비로그인으로 보내지 않는다.
 function startErrorOf(error: unknown): SessionStartError | null {
   if (!isAppError(error)) return 'server';
   if (error.kind === 'network') return 'network';
-  if (error.kind === 'server') return 'server';
+  if (error.kind === 'server' || error.status === 429) return 'server';
   return null;
 }
 

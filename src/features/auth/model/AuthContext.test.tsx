@@ -112,6 +112,15 @@ describe('AuthContext 시작', () => {
     expect(text('status')).toBe('loading');
   });
 
+  it('요청 한도 초과(429) → 비로그인으로 보내지 않고 다시 시도를 기다린다', async () => {
+    setSessionScenario({ session: 'certified' });
+    server.use(http.get('*/api/auth/status', () => fail(429, 'TOO_MANY_REQUESTS', '요청이 너무 많습니다')));
+    renderSession();
+
+    await waitFor(() => expect(text('startError')).toBe('server'));
+    expect(text('status')).toBe('loading');
+  });
+
   it('어느 경우에도 접근 토큰을 기기 저장소에 쓰지 않는다', async () => {
     for (const session of ['certified', 'anonymous'] as const) {
       setSessionScenario({ session });
