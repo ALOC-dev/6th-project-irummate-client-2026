@@ -15,10 +15,11 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 
 ## 배포 대상
 
-- 사용자 서비스는 **Android·iOS 앱**으로 낸다. 사용자용 웹은 없다.
+- 사용자 서비스는 **Android·iOS 앱**으로 낸다. 운영용 사용자 웹은 없다.
 - 관리자 화면은 **앱과 관리자 웹** 두 곳에 있다.
   - 앱: 관리자 계정일 때만 관리자 화면 묶음을 지연 로딩한다.
   - 관리자 웹: Vercel에 올린다. 로그인·카카오 콜백·관리자 화면만 등록한다.
+- 테스트 배포(`test.irummate.com`)는 확인용이다. 앱 빌드(`npm run build`)를 웹에 올려 사용자 화면과 관리자 화면을 모두 열고, test 서버에 연결한다. 검색 노출은 막는다(ADR 0006 결정 6).
 - 빌드 대상 값은 `app` 또는 `admin-web`이다. `shared/config/env.ts`에서만 읽는다.
 - 앱 출시(Google Play·App Store)는 관리자 화면까지 모두 만든 뒤다.
 - Android와 iOS는 같은 코드로 동작한다. 두 플랫폼의 차이(뒤로가기, 화면 가장자리, 키보드, 딥링크, 보안 저장소, 권한 안내 문구)는 \shared/platform과 각 네이티브 프로젝트 설정에서만 다룬다.
