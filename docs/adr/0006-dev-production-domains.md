@@ -23,7 +23,7 @@
    | | 개발용 | 운영용 |
    | --- | --- | --- |
    | 도메인 | `test.irummate.com` | `www.irummate.com` |
-   | 관리자 웹 배포 | Vercel 프로젝트 하나, `main` 배포를 이 도메인의 Production으로 | 출시 때 정함(결정 2) |
+   | 관리자 웹 배포 | 테스트용 Vercel 프로젝트, Production 브랜치는 `test`(`main`에서 만든 배포 전용 브랜치) | 운영용 Vercel 프로젝트(출시 때, 결정 2) |
    | `/api` 프록시 대상 | test 서버 | 운영 서버 |
    | 카카오 redirect URI | `https://test.irummate.com/oauth/kakao/callback` | `https://www.irummate.com/oauth/kakao/callback` |
    | 서버 `KAKAO_REDIRECT_URI` | test 서버에 개발용 값 | 운영 서버에 운영용 값 |
@@ -32,9 +32,10 @@
    | 검색 노출 | 막음(`X-Robots-Tag: noindex`) | 허용 |
 
    - Vercel에 `test.irummate.com`을 등록할 때 **Production**에 붙이고, 루트 도메인 리다이렉트 옵션("Redirect apex domain to www")은 끈다. Preview에 붙이면 Vercel 기본 접근 보호가 걸려 앱 연결 파일과 카카오 콜백이 막힌다. 리다이렉트 옵션을 켜면 `irummate.com`·`www.irummate.com`이 개발 프로젝트에 함께 붙는다.
-   - 환경 변수는 Production 환경에 넣는다. Vercel의 "Production"은 이 프로젝트의 `main` 배포라는 뜻이고, 연결 서버(test 서버)와 환경 변수로 개발용이 된다.
+   - 환경 변수는 Production 환경에 넣는다. Vercel의 "Production"은 이 프로젝트의 Production 브랜치(`test`) 배포라는 뜻이고, 연결 서버(test 서버)와 환경 변수로 개발용이 된다.
+   - `test` 브랜치는 배포 전용이다. 기능 작업과 PR은 지금처럼 `main`으로 하고, 테스트 배포에 내보낼 때 `main`의 변경을 `test`에 반영한다(`test`에서 직접 커밋하지 않음). 반영하지 않으면 `test.irummate.com`은 이전 코드로 남는다.
 2. **`www.irummate.com`은 출시 전까지 연결하지 않는다.** 출시 준비 때 아래를 정하고 앱 연결 파일(출시 서명 지문)과 함께 올린다.
-   - Vercel은 프로젝트당 Production 브랜치가 하나라, `main` 하나로 운영(`www`)과 개발(`test`)을 다른 설정으로 동시에 배포할 수 없다. 운영용 브랜치(예: `release`)를 두고 같은 프로젝트에서 `test`를 Preview(`main` 지정, 접근 보호 끔)로 옮기거나, 운영용 프로젝트를 따로 만든다.
+   - Vercel은 프로젝트당 Production 브랜치가 하나라, 운영과 테스트는 Vercel 프로젝트를 나눈다. 운영용 프로젝트의 Production 브랜치(`main` 또는 운영 배포 전용 브랜치)는 출시 때 정한다.
    - `www.irummate.com`은 운영 쪽 Production에 붙이고 루트 도메인 리다이렉트 옵션을 켠다(`irummate.com` → `www`). 루트 도메인을 다른 곳에서 쓰지 않는지 백엔드에 확인하고, 루트는 Vercel이 안내하는 A 레코드를 쓴다.
    - 카카오 redirect URI와 앱 연결 도메인은 `www`만 쓴다. 앱 연결 파일이 `www`에서 리다이렉트 없이 200으로 오는지 확인한다.
    - `/api` 프록시 대상은 `vercel.json` rewrite에 환경 변수를 쓸 수 없어, 환경마다 다르게 두려면 환경 변수를 읽어 넘기는 Vercel 함수가 필요하다. 출시 전까지는 test 서버 주소 하나만 둔다.
