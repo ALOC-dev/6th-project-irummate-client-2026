@@ -11,3 +11,15 @@ export { authClientBindings } from './model/clientBindings';
 
 // A 페이지용: 소개 완료 표시(소개 화면이 남기고, 개발용 MSW 시나리오도 쓴다)
 export { introProgress } from './model/onboardingProgress';
+
+// A 페이지용: 로그인·콜백·로그아웃·탈퇴
+export { useKakaoLogin } from './hooks/useKakaoLogin';
+export type { KakaoLogin, UseKakaoLoginOptions } from './hooks/useKakaoLogin';
+export { useKakaoCallback } from './hooks/useKakaoCallback';
+export type { KakaoCallbackFailure, KakaoCallbackResult } from './hooks/useKakaoCallback';
+export { useLogout } from './hooks/useLogout';
+export type { Logout } from './hooks/useLogout';
+export { useWithdraw } from './hooks/useWithdraw';
+export type { Withdraw } from './hooks/useWithdraw';
+export { KakaoLoginButton } from './components/KakaoLoginButton';
+export type { KakaoLoginButtonProps } from './components/KakaoLoginButton';

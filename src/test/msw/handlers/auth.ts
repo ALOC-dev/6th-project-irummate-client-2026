@@ -1,7 +1,7 @@
 import { http } from 'msw';
 
 import { mswAccessToken, serverUserBase } from '../fixtures/session';
-import { getSessionScenario, type SessionScenario } from '../scenarios/session';
+import { getSessionScenario, setSessionScenario, type SessionScenario } from '../scenarios/session';
 import { fail, ok } from './envelope';
 
 // 시나리오 → 서버 user 필드. 단계는 클라이언트의 판정 함수가 이 값으로 정한다.
@@ -49,9 +49,20 @@ export function createAuthHandlers({ refresh = 'ok' }: AuthHandlerOptions = {}) 
       if (scenario.session === 'anonymous') return ok({ authenticated: false, user: null });
       return ok({ authenticated: true, user: serverUser(scenario) });
     }),
-    http.get('*/api/auth/kakao/callback', () => ok({ accessToken: mswAccessToken })),
-    http.post('*/api/auth/logout', () => ok(null)),
-    http.delete('*/api/users/me', () => ok(null)),
+    // 로그인하면 비로그인 시나리오를 인증 완료로 바꾼다(가짜 서버에 사용자가 생긴 것처럼).
+    // 로그아웃·탈퇴하면 비로그인으로 돌린다. 개발 서버에서 로그인 → 로그아웃을 이어서 시험할 수 있다.
+    http.get('*/api/auth/kakao/callback', () => {
+      if (getSessionScenario().session === 'anonymous') setSessionScenario({ session: 'certified' });
+      return ok({ accessToken: mswAccessToken });
+    }),
+    http.post('*/api/auth/logout', () => {
+      setSessionScenario({ session: 'anonymous' });
+      return ok(null);
+    }),
+    http.delete('*/api/users/me', () => {
+      setSessionScenario({ session: 'anonymous' });
+      return ok(null);
+    }),
   ];
 }
 
