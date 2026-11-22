@@ -87,7 +87,10 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 
 ## 작업 방식
 
-- 브랜치는 기능 단위로 만든다(예: `feat/auth-token-storage`). 하루 한 번 이상 main 기준으로 rebase한다.
+- 브랜치는 두 개를 기준으로 쓴다(ADR 0006).
+  - `test`: 개발 통합 브랜치. 기능 브랜치는 여기서 만들고 여기로 병합한다. 병합되면 테스트 배포(`test.irummate.com`, test 서버)에 자동으로 올라간다.
+  - `main`: 운영에 나간 코드. `test` → `main` 출시 PR로만 바뀐다. 출시 PR은 merge commit으로 병합한다(squash·rebase는 두 브랜치의 기록을 어긋나게 해 다음 출시 때 충돌이 난다).
+- 기능 브랜치는 기능 단위로 만든다(예: `feat/auth-token-storage`). 하루 한 번 이상 `test` 기준으로 rebase한다.
 - PR 하나에는 화면 하나, 또는 같은 목적의 파일 묶음 하나(예: `shared/api`, 프로젝트 설정)를 담는다.
 - 순수 함수(단계 판정, 금액 계산 등)는 테이블 테스트를 함께 만든다. API가 걸린 동작은 MSW로 시험한다.
 - 커밋 전에 `lint`, `typecheck`, `test`를 통과시킨다.
@@ -119,7 +122,8 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 
 ### 기본 원칙
 
-- 모든 기능 변경은 PR을 통해 `main`에 병합한다.
+- 모든 기능 변경은 PR을 통해 `test`에 병합한다. `main`에는 `test`에서 오는 출시 PR만 병합한다.
+- 출시 PR(`test` → `main`)은 두 사람 모두 확인한 뒤 병합한다.
 - `iaruok`의 PR은 `uukdo`, `uukdo`의 PR은 `iaruok`가 검토한다.
 - 필수 CI 통과는 모든 PR의 병합 조건이다.
 - 아래 Critical Review 항목에 해당하면 상대 개발자의 승인(Approve) 1회를 받은 뒤 병합한다.
@@ -148,7 +152,7 @@ React · TypeScript(strict) · Vite · TanStack Query · React Router(데이터 
 
 ### Merge Policy
 
-- `main` 직접 push 금지
+- `test`·`main` 직접 push 금지
 - 필수 CI 실패 시 병합 금지
 - Critical Review 항목에 해당하는 PR은 승인 없이 병합 금지
 - 미해결 Blocking Comment가 있는 PR 병합 금지
