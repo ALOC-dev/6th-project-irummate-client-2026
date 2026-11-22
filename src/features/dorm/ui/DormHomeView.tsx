@@ -15,11 +15,12 @@ import { ScheduleSection } from './ScheduleSection';
 const REFRESH_MS = 1200;
 
 interface DormHomeViewProps {
+  // 호실(예: 408호). 서버 세션에 호실이 없어 지금은 넘어오지 않는다. 나중에 dorm API로 받는다(ADR 0005).
   roomLabel?: string;
   today?: Date;
 }
 
-export function DormHomeView({ roomLabel = '408호', today = new Date() }: DormHomeViewProps) {
+export function DormHomeView({ roomLabel, today = new Date() }: DormHomeViewProps) {
   const navigate = useNavigate();
   const [toast, setToast] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -65,7 +66,7 @@ export function DormHomeView({ roomLabel = '408호', today = new Date() }: DormH
         <div className="px-5 pt-5">
           <p className="m-0 mt-1 inline-flex items-center gap-2 text-[18px] font-bold tracking-irum-normal text-fg-strong">
             <DormIcon name="building" className="size-6 text-fg-brand" />
-            <span>생활관 · {roomLabel}</span>
+            <span>{roomLabel ? `생활관 · ${roomLabel}` : '생활관'}</span>
           </p>
         </div>
         <div className="relative z-[1] mt-5 flex flex-col gap-7 px-5 pb-6">
