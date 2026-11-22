@@ -14,10 +14,10 @@ const anonymous: SessionScenario = { session: 'anonymous' };
 const certified: SessionScenario = { session: 'certified' };
 const onboarding = (stage: 'terms' | 'intro' | 'profile' | 'certification'): SessionScenario => ({ session: 'onboarding', stage });
 
-// 화면 19개: [경로, 시나리오, 화면 ID]
+// 화면 18개: [경로, 시나리오, 화면 ID]
+// 카카오 콜백(ON-00)은 처리 중에만 잠깐 보이고 바로 다른 화면으로 가므로 아래에서 따로 시험한다.
 const screens: Array<[string, SessionScenario, string]> = [
   [paths.login, anonymous, 'ON-01'],
-  [paths.kakaoCallback, anonymous, 'ON-00'],
   [paths.onboarding.terms, onboarding('terms'), 'ON-02'],
   [paths.onboarding.intro, onboarding('intro'), 'ON-03'],
   [paths.onboarding.profile, onboarding('profile'), 'ON-04'],
@@ -51,6 +51,13 @@ describe('라우트 골격 (앱)', () => {
     setSessionScenario(scenario);
     renderWithProviders({ route });
     expect(await screen.findByRole('heading', { name: new RegExp(`^${screenId} `) })).toBeInTheDocument();
+  });
+
+  it('코드 없이 카카오 콜백에 오면 로그인으로 간다', async () => {
+    setSessionScenario(anonymous);
+    const { router } = renderWithProviders({ route: paths.kakaoCallback });
+    expect(await screen.findByRole('heading', { name: /^ON-01 / })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe(paths.login);
   });
 
   it('관리자 홈 → AD-01', async () => {
