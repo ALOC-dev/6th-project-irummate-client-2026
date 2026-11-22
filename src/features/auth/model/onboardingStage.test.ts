@@ -12,6 +12,7 @@ const base: AuthStatusUser = {
   certificationStatus: 'NONE',
   detailsCompleted: false,
   surveyCompleted: false,
+  termsAgreed: null,
 };
 
 const fresh: OnboardingProgress = { introCompleted: false, termsAgreedInSession: false };
@@ -38,6 +39,8 @@ describe('getOnboardingStage', () => {
     // 4. 약관
     ['처음 가입 → terms', {}, fresh, 'terms'],
     ['소개 표시가 있어도 이번 실행에 동의 전이고 기본 정보가 없으면 → terms', {}, introDoneNewRun, 'terms'],
+    ['서버가 미동의라고 주면 이번 실행 중 동의보다 우선 → terms', { termsAgreed: false }, introDone, 'terms'],
+    ['서버가 동의라고 주면 새 실행이어도 → intro', { termsAgreed: true }, fresh, 'intro'],
     // 5. 소개
     ['약관 동의 후 → intro', {}, agreed, 'intro'],
     ['기본 정보를 냈지만 이 기기에 소개 표시 없음 → intro', { detailsCompleted: true }, fresh, 'intro'],

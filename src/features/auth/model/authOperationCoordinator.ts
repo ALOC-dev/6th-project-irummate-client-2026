@@ -8,6 +8,9 @@ export interface AuthOperationHandlers<TUser> {
   commitAuthenticated(user: TUser | null | undefined): void;
   commitTokenRefreshed(): void;
   commitUnauthenticated(): void;
+  // 2학기 추가: 시작 시 상태 확인이 실패했을 때 오류를 보고 처리를 정한다(네트워크 끊김은 로그아웃하지 않음).
+  // 넘기지 않으면 1학기와 같이 commitUnauthenticated를 부른다.
+  commitBootstrapFailed?(error: unknown): void;
   loadCurrentUser(): Promise<TUser | null | undefined>;
   removeAccessToken(): void;
   setAccessToken(accessToken: string): void;
@@ -24,6 +27,7 @@ export function createAuthOperationCoordinator<TUser>({
   commitAuthenticated,
   commitTokenRefreshed,
   commitUnauthenticated,
+  commitBootstrapFailed = () => commitUnauthenticated(),
   loadCurrentUser,
   removeAccessToken,
   setAccessToken,
@@ -48,7 +52,7 @@ export function createAuthOperationCoordinator<TUser>({
         if (isCurrentBootstrap(version)) commitAuthenticated(user);
         return user;
       } catch (error) {
-        if (isCurrentBootstrap(version)) commitUnauthenticated();
+        if (isCurrentBootstrap(version)) commitBootstrapFailed(error);
         throw error;
       }
     })();
