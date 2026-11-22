@@ -15,15 +15,22 @@ function renderBoard(initialEntry = '/mate') {
 
 type User = ReturnType<typeof userEvent.setup>;
 
-// 한 글자씩 치는 user.type은 느려서 전체 테스트에서 시간 초과가 나므로, 눌러서 붙여 넣는다.
-async function fill(user: User, label: string, text: string) {
-  await user.click(screen.getByLabelText(label));
+// 윈도우의 jsdom은 느려서 이 파일이 5초 기본 제한을 넘곤 했다. 그래서
+// - 동작 사이에 기다리지 않는다(delay: null). 이 파일은 가짜 시계를 쓰지 않아 안전하다.
+// - 작성 창 안의 요소는 작성 창(dialog) 안에서만 찾는다. getByRole은 범위 안의 모든 요소를 훑는다.
+// - 한 글자씩 치는 user.type 대신 눌러서 붙여 넣는다.
+function setupUser() {
+  return userEvent.setup({ delay: null });
+}
+
+async function fill(user: User, scope: HTMLElement, label: string, text: string) {
+  await user.click(within(scope).getByLabelText(label));
   await user.paste(text);
 }
 
-async function pickDate(user: User, field: string, day: number) {
-  await user.click(screen.getByRole('button', { name: new RegExp(`^${field}`) }));
-  const panel = screen.getByRole('group', { name: `${field} 고르기` });
+async function pickDate(user: User, scope: HTMLElement, field: string, day: number) {
+  await user.click(within(scope).getByRole('button', { name: new RegExp(`^${field}`) }));
+  const panel = within(scope).getByRole('group', { name: `${field} 고르기` });
   await user.click(within(panel).getByRole('button', { name: '다음 달' }));
   await user.click(within(panel).getByRole('button', { name: new RegExp(`월 ${day}일$`) }));
 }
@@ -45,7 +52,7 @@ describe('MateBoard', () => {
   });
 
   it('북마크하면 즐겨찾기만 보기에 남는다', async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderBoard();
     await user.click(screen.getByRole('button', { name: '즐겨찾기에 저장: 주말 한강 러닝 크루 모집' }));
     expect(screen.getByRole('status')).toHaveTextContent('즐겨찾기에 저장했어요');
@@ -56,12 +63,12 @@ describe('MateBoard', () => {
 
   it('저장한 글이 없으면 안내한다', async () => {
     renderBoard();
-    await userEvent.click(screen.getByRole('button', { name: '즐겨찾기만 보기' }));
+    await setupUser().click(screen.getByRole('button', { name: '즐겨찾기만 보기' }));
     expect(screen.getByText('저장한 모집 글이 없어요')).toBeInTheDocument();
   });
 
   it('게시글 쿼리로 상세 시트를 열고 참여한다', async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderBoard('/mate?post=1');
     const sheet = screen.getByRole('dialog', { name: '오늘 저녁 학식 같이 드실 분' });
     expect(within(sheet).getByText('생활관 1층 로비')).toBeInTheDocument();
@@ -73,31 +80,31 @@ describe('MateBoard', () => {
   });
 
   it('작성 오버레이에서 목 모집 글을 추가한다', async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderBoard();
     await user.click(screen.getByRole('button', { name: '모집하기' }));
-    expect(screen.getByRole('dialog', { name: '모집 글 작성' })).toBeInTheDocument();
-    await fill(user, '모집 제목', '같이 산책해요');
-    await fill(user, '모집 내용', '저녁에 가볍게 걸어요.');
-    await fill(user, '만날 장소', '생활관 로비');
+    const form = screen.getByRole('dialog', { name: '모집 글 작성' });
+    await fill(user, form, '모집 제목', '같이 산책해요');
+    await fill(user, form, '모집 내용', '저녁에 가볍게 걸어요.');
+    await fill(user, form, '만날 장소', '생활관 로비');
     // 날짜만 고르면 기본 시각(다음 정시)이 들어간다. 날짜에 상관없이 통과하도록 다음 달에서 고르고,
     // 마감(14일)이 활동(15일)보다 빠르도록 한다.
-    await pickDate(user, '활동 일시', 15);
-    await pickDate(user, '모집 마감 일시', 14);
-    expect(screen.getByRole('button', { name: /^활동 일시 .*\d{2}:\d{2}$/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^모집 마감 일시 .*\d{2}:\d{2}$/ })).toBeInTheDocument();
+    await pickDate(user, form, '활동 일시', 15);
+    await pickDate(user, form, '모집 마감 일시', 14);
+    expect(within(form).getByRole('button', { name: /^활동 일시 .*\d{2}:\d{2}$/ })).toBeInTheDocument();
+    expect(within(form).getByRole('button', { name: /^모집 마감 일시 .*\d{2}:\d{2}$/ })).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: '모집 글 올리기' }));
+    await user.click(within(form).getByRole('button', { name: '모집 글 올리기' }));
     expect(screen.getByRole('status')).toHaveTextContent('모집 글을 올렸어요');
     await user.click(screen.getByRole('button', { name: '밥 모집: 같이 산책해요' }));
     expect(screen.getByRole('dialog', { name: '같이 산책해요' })).toBeInTheDocument();
-  });
+  }, 15_000); // 동작이 많은 테스트라 느린 컴퓨터(윈도우)에서도 시간 초과가 나지 않도록 여유를 둔다.
 
   it('작성을 닫으면 입력한 초안을 초기화한다', async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderBoard();
     await user.click(screen.getByRole('button', { name: '모집하기' }));
-    await fill(user, '모집 제목', '남으면 안 되는 제목');
+    await fill(user, screen.getByRole('dialog', { name: '모집 글 작성' }), '모집 제목', '남으면 안 되는 제목');
     await user.click(screen.getByRole('button', { name: '닫기' }));
     await user.click(screen.getByRole('button', { name: '모집하기' }));
     expect(screen.getByLabelText('모집 제목')).toHaveValue('');
