@@ -23,6 +23,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- 카카오 로그인 콜백을 앱이 받는다(App Links). 도메인은 빌드 종류별 값(build.gradle의 appLinkHost), ADR 0006 -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="${appLinkHost}"
+                    android:path="/oauth/kakao/callback" />
+            </intent-filter>
+
         </activity>
 
         <provider

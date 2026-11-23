@@ -1,0 +1,10 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["3Q67PA3CKL.com.irummate.app"],
+        "components": [{ "/": "/oauth/kakao/callback" }]
+      }
+    ]
+  }
+}
