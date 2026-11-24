@@ -252,19 +252,49 @@ describe('statusBar', () => {
 });
 
 describe('keyboard', () => {
-  it('앱에서는 열림·닫힘과 높이를 전달하고, 해제하면 두 구독을 모두 지운다', async () => {
-    plugin.platform = 'android';
+  // 앱은 키보드가 열리면 웹뷰가 줄어 가리는 부분이 없다. 키보드 자체의 높이를 넘기면 화면이 두 번 밀린다.
+  it.each(['android', 'ios'] as const)('%s 앱에서는 열림·닫힘을 전달하고 가려진 높이는 0이다. 해제하면 두 구독을 모두 지운다', async (platform) => {
+    plugin.platform = platform;
     const handler = vi.fn();
     const off = keyboard.onChange(handler);
     await flush();
 
     plugin.emit('keyboardWillShow', { keyboardHeight: 300 });
     plugin.emit('keyboardWillHide');
-    expect(handler).toHaveBeenNthCalledWith(1, { open: true, height: 300 });
+    expect(handler).toHaveBeenNthCalledWith(1, { open: true, height: 0 });
     expect(handler).toHaveBeenNthCalledWith(2, { open: false, height: 0 });
 
     off();
     await flush();
     expect(listenerCount('keyboardWillShow') + listenerCount('keyboardWillHide')).toBe(0);
+  });
+
+  describe('웹', () => {
+    let viewport: EventTarget & { height: number };
+
+    // 바깥 beforeEach가 플랫폼을 웹으로 되돌린다.
+    beforeEach(() => {
+      vi.stubGlobal('visualViewport', (viewport = Object.assign(new EventTarget(), { height: 800 })));
+      vi.stubGlobal('innerHeight', 800);
+    });
+
+    afterEach(() => vi.unstubAllGlobals());
+
+    it.each([
+      { case: '화면 영역이 줄면 줄어든 만큼이 가려진 높이다', visibleHeight: 464, expected: { open: true, height: 336 } },
+      { case: '화면 영역이 그대로면 닫힘이다', visibleHeight: 800, expected: { open: false, height: 0 } },
+      { case: '화면 영역이 더 커져도 음수가 되지 않는다', visibleHeight: 820, expected: { open: false, height: 0 } },
+    ])('$case', ({ visibleHeight, expected }) => {
+      const handler = vi.fn();
+      const off = keyboard.onChange(handler);
+
+      viewport.height = visibleHeight;
+      viewport.dispatchEvent(new Event('resize'));
+      expect(handler).toHaveBeenCalledWith(expected);
+
+      off();
+      viewport.dispatchEvent(new Event('resize'));
+      expect(handler).toHaveBeenCalledTimes(1);
+    });
   });
 });
