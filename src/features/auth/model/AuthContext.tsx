@@ -19,6 +19,8 @@ export interface AuthActions {
   completeLogin(accessToken: string): Promise<SessionUser>;
   // 이 기기의 로그인 정보(메모리 토큰, 이번 실행의 약관 동의)를 지우고 비로그인으로 둔다. 서버 요청은 하지 않는다.
   signOut(): void;
+  // 앱 복귀 때 사용자를 다시 확인한다. 세션이 유효하면 true. 실패해도 연결 문제면 지금 상태를 그대로 둔다.
+  revalidate(): Promise<boolean>;
 }
 
 export const AuthActionsContext = createContext<AuthActions | null>(null);
@@ -73,6 +75,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const startError = startErrorOf(error);
         setState(startError ? { ...loading, startError } : anonymous);
       },
+      // 복귀 확인은 지금 화면을 두고 하는 확인이라, 연결 끊김·서버 오류·429면 아무것도 바꾸지 않는다(스플래시도 띄우지 않음).
+      // 그 밖의 실패는 시작 확인과 같이 비로그인으로 둔다. 401·403은 만료 이벤트가 먼저 처리한다.
+      commitRevalidateFailed: (error) => {
+        if (startErrorOf(error)) return;
+        tokenStorage.clear();
+        setState(anonymous);
+      },
       loadCurrentUser: loadSessionUser,
       removeAccessToken: () => tokenStorage.clear(),
       setAccessToken: (accessToken) => tokenStorage.set(accessToken),
@@ -112,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // 진행 중이던 상태 확인이 늦게 끝나도 로그인 상태로 되돌리지 못하게 한다.
         coordinator.handleAuthExpired();
       },
+      revalidate: () => coordinator.revalidate(),
     }),
     [coordinator],
   );

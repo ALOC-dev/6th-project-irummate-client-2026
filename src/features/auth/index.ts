@@ -8,6 +8,7 @@ export { getAccessToken } from './model/clientBindings';
 // app용: Provider, 통신 계층 등록
 export { AuthProvider } from './model/AuthContext';
 export { authClientBindings } from './model/clientBindings';
+export { useRevalidateSession } from './hooks/useRevalidateSession';
 
 // A 페이지용: 소개 완료 표시(소개 화면이 남기고, 개발용 MSW 시나리오도 쓴다)
 export { introProgress } from './model/onboardingProgress';

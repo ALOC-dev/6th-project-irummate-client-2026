@@ -181,3 +181,111 @@ describe('authOperationCoordinator', () => {
     expect(loadCount).toBe(1);
   });
 });
+
+// 2학기 추가: 앱 복귀 확인
+describe('authOperationCoordinator.revalidate', () => {
+  const user = { id: 'user-1', role: 'USER' };
+
+  function createRevalidateHarness(loadCurrentUser: () => Promise<TestUser | null | undefined>) {
+    const commits: Array<Commit | { state: 'revalidate-failed'; error: unknown }> = [];
+    const coordinator = createAuthOperationCoordinator<TestUser>({
+      commitAuthenticated: (received) => commits.push({ state: 'authenticated', user: received }),
+      commitTokenRefreshed: () => commits.push({ state: 'token-refreshed' }),
+      commitUnauthenticated: () => commits.push({ state: 'unauthenticated' }),
+      commitRevalidateFailed: (error) => commits.push({ state: 'revalidate-failed', error }),
+      loadCurrentUser,
+      removeAccessToken: () => {},
+      setAccessToken: () => {},
+    });
+    return { commits, coordinator };
+  }
+
+  it('사용자가 있으면 반영하고 true', async () => {
+    const harness = createRevalidateHarness(async () => user);
+    expect(await harness.coordinator.revalidate()).toBe(true);
+    expect(harness.commits).toEqual([{ state: 'authenticated', user }]);
+  });
+
+  it('서버가 비로그인이라고 하면 그대로 넘기고(받는 쪽이 로그아웃) false', async () => {
+    const harness = createRevalidateHarness(async () => null);
+    expect(await harness.coordinator.revalidate()).toBe(false);
+    expect(harness.commits).toEqual([{ state: 'authenticated', user: null }]);
+  });
+
+  it('실패는 commitRevalidateFailed가 오류를 받고 false', async () => {
+    const error = new Error('network');
+    const harness = createRevalidateHarness(() => Promise.reject(error));
+    expect(await harness.coordinator.revalidate()).toBe(false);
+    expect(harness.commits).toEqual([{ state: 'revalidate-failed', error }]);
+  });
+
+  it('commitRevalidateFailed가 없으면 실패해도 상태를 바꾸지 않는다', async () => {
+    const harness = createHarness(() => Promise.reject(new Error('network')));
+    expect(await harness.coordinator.revalidate()).toBe(false);
+    expect(harness.commits).toEqual([]);
+  });
+
+  it('확인 중 만료(로그아웃)되면 늦게 온 결과를 버린다', async () => {
+    const pending = createDeferred<TestUser>();
+    const harness = createRevalidateHarness(() => pending.promise);
+    const result = harness.coordinator.revalidate();
+    harness.coordinator.handleAuthExpired();
+    pending.resolve(user);
+    expect(await result).toBe(false);
+    expect(harness.commits).toEqual([{ state: 'unauthenticated' }]);
+  });
+
+  it('확인 중 실패해도 그 사이 로그아웃했으면 실패 처리를 하지 않는다', async () => {
+    const pending = createDeferred<TestUser>();
+    const harness = createRevalidateHarness(() => pending.promise);
+    const result = harness.coordinator.revalidate();
+    harness.coordinator.handleAuthExpired();
+    pending.reject(new Error('network'));
+    expect(await result).toBe(false);
+    expect(harness.commits).toEqual([{ state: 'unauthenticated' }]);
+  });
+
+  it('겹친 호출은 하나로 합친다', async () => {
+    const pending = createDeferred<TestUser>();
+    let loadCount = 0;
+    const harness = createRevalidateHarness(() => {
+      loadCount += 1;
+      return pending.promise;
+    });
+    const first = harness.coordinator.revalidate();
+    const second = harness.coordinator.revalidate();
+    pending.resolve(user);
+    expect(await Promise.all([first, second])).toEqual([true, true]);
+    expect(loadCount).toBe(1);
+    expect(harness.commits).toEqual([{ state: 'authenticated', user }]);
+  });
+
+  it('시작 확인 중에는 건너뛴다', async () => {
+    const pending = createDeferred<TestUser>();
+    let loadCount = 0;
+    const harness = createRevalidateHarness(() => {
+      loadCount += 1;
+      return pending.promise;
+    });
+    const bootstrap = harness.coordinator.bootstrap();
+    expect(await harness.coordinator.revalidate()).toBe(false);
+    pending.resolve(user);
+    await bootstrap;
+    expect(loadCount).toBe(1);
+  });
+
+  it('로그인 진행 중에는 건너뛰고, 로그인 결과만 남는다', async () => {
+    const loginUser = createDeferred<TestUser>();
+    let loadCount = 0;
+    const harness = createRevalidateHarness(() => {
+      loadCount += 1;
+      return loginUser.promise;
+    });
+    const login = harness.coordinator.completeLogin('token');
+    expect(await harness.coordinator.revalidate()).toBe(false);
+    loginUser.resolve(user);
+    await login;
+    expect(loadCount).toBe(1);
+    expect(harness.commits).toEqual([{ state: 'authenticated', user }]);
+  });
+});
