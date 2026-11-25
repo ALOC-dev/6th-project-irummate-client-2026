@@ -43,9 +43,13 @@ describe('RouteErrorBoundary', () => {
     vi.restoreAllMocks();
   });
 
-  it('가장 바깥 라우트마다 오류 화면이 있다', () => {
+  it('루트 라우트와 그 바로 아래 라우트마다 오류 화면이 있다', () => {
     for (const target of ['app', 'admin-web'] as const) {
-      expect(createRoutes(target).every((route) => route.errorElement)).toBe(true);
+      const roots = createRoutes(target);
+      expect(roots.every((route) => route.errorElement)).toBe(true);
+      const children = roots.flatMap((route) => route.children ?? []);
+      expect(children.length).toBeGreaterThan(0);
+      expect(children.every((route) => route.errorElement)).toBe(true);
     }
   });
 });

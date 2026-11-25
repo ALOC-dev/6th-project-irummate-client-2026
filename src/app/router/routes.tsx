@@ -4,6 +4,7 @@ import { Navigate, type RouteObject } from 'react-router';
 import type { BuildTarget } from '@shared/config/env';
 
 import { OnboardingLayout } from '../layouts/OnboardingLayout';
+import { PlatformBridge } from '../providers/PlatformBridge';
 import { RouteErrorBoundary } from '../providers/RouteErrorBoundary';
 import { StackLayout } from '../layouts/StackLayout';
 import { TabLayout } from '../layouts/TabLayout';
@@ -97,11 +98,13 @@ const fallbackRoute: RouteObject = { path: '*', element: <Navigate to={paths.ent
 const withErrorBoundary = (route: RouteObject): RouteObject => ({ ...route, errorElement: <RouteErrorBoundary /> });
 
 // 빌드 대상에 따라 등록할 라우트를 고른다. 관리자 웹은 로그인·카카오 콜백·관리자 화면만 둔다.
+// 모든 라우트를 PlatformBridge(뒤로가기 버튼·앱 복귀·앱 연결 주소 처리) 아래에 둔다.
+// 하위 라우트마다 오류 화면을 두어, 화면 하나가 실패해도 PlatformBridge는 살아 있다(Android 뒤로가기가 계속 동작).
 export function createRoutes(target: BuildTarget): RouteObject[] {
   const entryRoute: RouteObject = { path: paths.entry, element: <EntryRedirect target={target} /> };
   const routes =
     target === 'admin-web'
       ? [entryRoute, ...publicRoutes, adminRoute, fallbackRoute]
       : [entryRoute, ...publicRoutes, userRoute, adminRoute, fallbackRoute];
-  return routes.map(withErrorBoundary);
+  return [withErrorBoundary({ element: <PlatformBridge />, children: routes.map(withErrorBoundary) })];
 }

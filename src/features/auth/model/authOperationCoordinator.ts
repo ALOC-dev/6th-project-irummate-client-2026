@@ -11,6 +11,9 @@ export interface AuthOperationHandlers<TUser> {
   // 2학기 추가: 시작 시 상태 확인이 실패했을 때 오류를 보고 처리를 정한다(네트워크 끊김은 로그아웃하지 않음).
   // 넘기지 않으면 1학기와 같이 commitUnauthenticated를 부른다.
   commitBootstrapFailed?(error: unknown): void;
+  // 2학기 추가: 앱 복귀 확인(revalidate)이 실패했을 때 처리를 정한다. 넘기지 않으면 아무것도 바꾸지 않는다.
+  // 401·403은 통신 계층이 만료 이벤트로 먼저 로그아웃시키므로, 여기에는 그 밖의 실패가 온다.
+  commitRevalidateFailed?(error: unknown): void;
   loadCurrentUser(): Promise<TUser | null | undefined>;
   removeAccessToken(): void;
   setAccessToken(accessToken: string): void;
@@ -21,6 +24,8 @@ export interface AuthOperationCoordinator<TUser> {
   completeLogin(accessToken: string): Promise<TUser>;
   handleAuthExpired(): void;
   handleTokenRefreshed(): void;
+  // 2학기 추가: 로그인된 상태에서 앱 복귀 때 사용자를 다시 확인한다. 세션이 유효하면 true.
+  revalidate(): Promise<boolean>;
 }
 
 export function createAuthOperationCoordinator<TUser>({
@@ -28,11 +33,13 @@ export function createAuthOperationCoordinator<TUser>({
   commitTokenRefreshed,
   commitUnauthenticated,
   commitBootstrapFailed = () => commitUnauthenticated(),
+  commitRevalidateFailed = () => {},
   loadCurrentUser,
   removeAccessToken,
   setAccessToken,
 }: AuthOperationHandlers<TUser>): AuthOperationCoordinator<TUser> {
   let bootstrapPromise: Promise<TUser | null | undefined> | null = null;
+  let revalidatePromise: Promise<boolean> | null = null;
   let hasLoginStarted = false;
   let isLoginInProgress = false;
   let operationVersion = 0;
@@ -110,5 +117,32 @@ export function createAuthOperationCoordinator<TUser>({
     commitTokenRefreshed();
   }
 
-  return { bootstrap, completeLogin, handleAuthExpired, handleTokenRefreshed };
+  // 시작 확인·로그인이 진행 중이면 그쪽 결과를 따르고 건너뛴다. 겹친 호출은 진행 중인 것 하나로 합친다.
+  // 순번은 올리지 않는다. 확인 중에 로그아웃·만료·로그인이 일어나면 순번이 바뀌어 늦게 온 결과를 버린다.
+  function revalidate(): Promise<boolean> {
+    if (isLoginInProgress || bootstrapPromise) return Promise.resolve(false);
+    if (revalidatePromise) return revalidatePromise;
+
+    const version = operationVersion;
+    const isCurrent = () => version === operationVersion && !isLoginInProgress;
+    const operationPromise = (async () => {
+      try {
+        const user = await loadCurrentUser();
+        if (!isCurrent()) return false;
+        commitAuthenticated(user);
+        return user !== null && user !== undefined;
+      } catch (error) {
+        if (isCurrent()) commitRevalidateFailed(error);
+        return false;
+      }
+    })();
+
+    revalidatePromise = operationPromise;
+    void operationPromise.finally(() => {
+      if (revalidatePromise === operationPromise) revalidatePromise = null;
+    });
+    return operationPromise;
+  }
+
+  return { bootstrap, completeLogin, handleAuthExpired, handleTokenRefreshed, revalidate };
 }
