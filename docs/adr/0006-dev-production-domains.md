@@ -2,8 +2,8 @@
 
 - 날짜: 2026-11-22
 - 단계: 2단계 (기반)
-- 상태: 제안 (개발용 도메인은 `test.irummate.com`으로 정함. DNS 연결과 test 서버 설정은 백엔드 확인 후 확정)
-- 결정한 사람: iaruok (브랜치 분리·테스트 배포의 빌드 종류(결정 6)는 uukdo 합의 필요, 도메인은 백엔드 확인 필요)
+- 상태: 결정됨 (2026-11-23, 백엔드의 DNS 연결·test 서버 redirect URI·카카오 콘솔 설정 완료)
+- 결정한 사람: iaruok (브랜치 분리(결정 5)는 uukdo와 합의, 테스트 배포의 빌드 종류(결정 6)는 uukdo 확인 필요), 도메인은 백엔드 확인
 - 바꾸는 결정: 0003 결정 1
 
 ## 배경
@@ -76,6 +76,8 @@
 - 0003에 적은 앱 기기 시험(fetch·axios 경로)은 브라우저에서 받은 코드를 붙여 넣는 방식이라, redirect URI 값이 바뀌어도 결과에 영향이 없다. 시험할 때는 test 서버의 redirect URI와 같은 주소로 카카오 인증을 시작해야 한다.
 
 ## 백엔드에 요청할 것
+
+1~3, 5는 2026-11-23 완료. 4의 운영 서버 주소는 출시 준비 때 받는다.
 
 1. `test.irummate.com` DNS를 Vercel이 안내하는 CNAME으로 연결. 이 주소를 지금 다른 서버(test API 등)가 쓰고 있지 않은지 확인
 2. test 서버 `KAKAO_REDIRECT_URI`를 `https://test.irummate.com/oauth/kakao/callback`으로 변경

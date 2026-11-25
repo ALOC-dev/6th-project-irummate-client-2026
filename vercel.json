@@ -12,6 +12,10 @@
   ],
   "headers": [
     {
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [{ "key": "Content-Type", "value": "application/json" }]
+    },
+    {
       "source": "/(.*)",
       "missing": [{ "type": "host", "value": "www.irummate.com" }],
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]

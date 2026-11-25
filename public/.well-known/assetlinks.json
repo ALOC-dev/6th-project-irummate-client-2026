@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.irummate.app",
+      "sha256_cert_fingerprints": [
+        "A1:FD:34:24:00:A4:A4:A6:43:28:C0:C0:05:2B:6D:59:6A:A2:7E:E7:67:AC:BA:59:95:E5:39:E3:66:67:20:AA"
+      ]
+    }
+  }
+]

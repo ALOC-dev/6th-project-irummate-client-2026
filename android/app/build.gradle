@@ -17,7 +17,12 @@ android {
         }
     }
     buildTypes {
+        // App Links 도메인(ADR 0006): 디버그는 개발용, 출시는 운영용 도메인
+        debug {
+            manifestPlaceholders = [appLinkHost: "test.irummate.com"]
+        }
         release {
+            manifestPlaceholders = [appLinkHost: "www.irummate.com"]
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
