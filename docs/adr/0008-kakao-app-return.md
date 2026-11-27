@@ -21,7 +21,7 @@
 - 코드:
   - 앱 연결 설정: App Links·Universal Links 설정 PR(#46)의 Android 파일(`AndroidManifest.xml` intent-filter, `build.gradle`의 빌드별 도메인)
   - 받은 주소 처리: 기기 동작 연결 PR(#47)의 `PlatformBridge`
-  - 시험 당시 두 PR 모두 병합 전이라, #47 브랜치에 #46의 Android 파일을 임시로 얹어 빌드했다(커밋하지 않음).
+  - 시험 당시(2026-11-25) 두 PR 모두 병합 전이라, #47 브랜치에 #46의 Android 파일을 임시로 얹어 빌드했다(커밋하지 않음). #46은 그 뒤 `test`에 병합됐다.
 - 도메인 인증: 테스트 배포에 `assetlinks.json`이 아직 없어 자동 인증은 실패 상태(`1024`)였다. 대신 기기에서 사용자 승인으로 `test.irummate.com` 링크를 앱으로 열게 했다(`pm set-app-links-user-selection`). 앱이 주소를 받은 뒤의 동작은 자동 인증과 같다.
 - 서버: test 서버, redirect URI `https://test.irummate.com/oauth/kakao/callback`
 - 시작 상태: 앱 데이터를 지운 뒤(비로그인) 시작
@@ -43,17 +43,19 @@
 1. **카카오 복귀는 ① App Links·Universal Links로 한다.** 카카오 네이티브 로그인(②)은 쓰지 않으므로 백엔드에 카카오 토큰 로그인 API를 요청하지 않는다.
 2. 0003 결정 1과 0006의 redirect URI가 그대로 확정된다. 개발용은 `https://test.irummate.com/oauth/kakao/callback`, 운영용은 `https://www.irummate.com/oauth/kakao/callback`이다. 웹과 앱이 같은 주소를 쓴다.
 3. 앱은 카카오 redirect URI와 같은 도메인의 https 주소만 받는다. 그 밖의 주소는 무시한다(`app/router/deepLinkPath.ts`). 카카오 콜백 주소를 받으면 앱 안 브라우저를 닫고 콜백 화면으로 이동한다. 이때 로그인 화면 기록을 콜백 화면으로 바꿔 끼운다.
-4. iOS 실기기에서 실패하면(Universal Link가 앱으로 오지 않거나 앱 안 브라우저가 닫히지 않음) 이 결정을 다시 연다. ②로 바꾸면 두 플랫폼 모두 바꾸고, 백엔드에 API를 요청한다.
+4. iOS 실기기에서 실패하면 원인에 따라 나눈다.
+   - 앱 코드·설정의 잘못(#47의 주소 처리, #48의 Associated Domains·서명 등): 병합 전에 해당 PR에서 고치고, 이 결정은 유지한다.
+   - 방식 자체가 iOS에서 동작하지 않음(설정이 맞는데도 Universal Link가 앱으로 오지 않거나, 앱 안 브라우저에서 앱으로 돌아오지 못함): 이 결정을 다시 연다. ②로 바꾸면 두 플랫폼 모두 바꾸고, 백엔드에 API를 요청한다.
 
 ## 남은 확인
 
-- [ ] **Android 자동 인증:** #46 병합 후 테스트 배포의 `assetlinks.json`으로 자동 인증이 되는지(`pm get-app-links`에서 `verified`). 사용자 승인 없이 위 결과가 같은지
-- [ ] **iOS 실기기(uukdo):** 실제 iPhone에서 위 결과표의 다섯 항목. Associated Domains(`applinks:test.irummate.com`)는 #48에서 설정한다. 시험은 #47·#48을 병합하기 전에, `test`에서 만든 임시 브랜치에 두 브랜치를 합쳐 빌드해서 한다(Android 시험과 같은 방식). 문제가 나오면 병합 전에 해당 PR에서 고친다. 시뮬레이터 결과만으로는 이 결정을 확정하지 않는다
+- [ ] **Android 자동 인증:** #46이 `test`에 병합되어 테스트 배포에 `assetlinks.json`이 올라간 뒤, 자동 인증이 되는지(`pm get-app-links`에서 `verified`). 사용자 승인 없이 위 결과가 같은지
+- [ ] **iOS 실기기(uukdo):** 실제 iPhone에서 위 결과표의 다섯 항목. Associated Domains(`applinks:test.irummate.com`)는 #48에서 설정한다. 시험은 #47·#48을 병합하기 전에 한다. #46은 이미 `test`에 있으므로, `test`에서 만든 임시 브랜치에 #47·#48 브랜치를 합쳐 빌드한다(병합 전에 임시로 합쳐 시험하는 점은 Android 시험과 같다). 실패하면 결정 4에 따라 처리한다. 시뮬레이터 결과만으로는 이 결정을 확정하지 않는다
 - [ ] **로그인 도중 앱이 종료된 경우:** 카카오 로그인을 시작할 때 만든 state 값은 웹뷰의 sessionStorage에 있다. 앱 안 브라우저에 있는 동안 시스템이 앱을 종료하면 이 값이 사라져, 돌아왔을 때 대조에 실패하고 로그인 화면으로 간다(다시 로그인하면 됨). 기기에서 시험하지 않았다. 자주 일어나면 저장 위치를 다시 정한다
 - [ ] **출시 빌드:** 출시 서명(Play 앱 서명) 지문을 운영 도메인의 `assetlinks.json`에 넣는다(0006 결정 2)
 
 ## 영향
 
-- 코드: `useKakaoLogin`(앱 안 브라우저로 카카오 인증 주소 열기), `deepLink` 어댑터, `PlatformBridge`. 모두 이미 있고 추가 변경은 없다.
+- 코드: `useKakaoLogin`(앱 안 브라우저로 카카오 인증 주소 열기)과 `deepLink` 어댑터는 `test`에 있다. 받은 주소 처리(`PlatformBridge`)는 #47에 있다. 이 결정으로 더 바꿀 코드는 없다.
 - 백엔드: 요청할 것 없음. test 서버 redirect URI와 카카오 콘솔 설정은 0006에서 끝났다.
 - 앱이 설치된 Android 폰에서는 `test.irummate.com`의 콜백 주소를 앱이 받으므로, 그 폰의 브라우저로는 테스트 배포에 카카오 로그인을 할 수 없다. 웹 로그인 시험은 PC나 앱이 없는 기기에서 한다.
