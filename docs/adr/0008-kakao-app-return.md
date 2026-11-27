@@ -22,7 +22,7 @@
   - 앱 연결 설정: App Links·Universal Links 설정 PR(#46)의 Android 파일(`AndroidManifest.xml` intent-filter, `build.gradle`의 빌드별 도메인)
   - 받은 주소 처리: 기기 동작 연결 PR(#47)의 `PlatformBridge`
   - 시험 당시(2026-11-25) 두 PR 모두 병합 전이라, #47 브랜치에 #46의 Android 파일을 임시로 얹어 빌드했다(커밋하지 않음). #46은 그 뒤 `test`에 병합됐다.
-- 도메인 인증: 테스트 배포에 `assetlinks.json`이 아직 없어 자동 인증은 실패 상태(`1024`)였다. 대신 기기에서 사용자 승인으로 `test.irummate.com` 링크를 앱으로 열게 했다(`pm set-app-links-user-selection`). 앱이 주소를 받은 뒤의 동작은 자동 인증과 같다.
+- 도메인 인증: 테스트 배포에 `assetlinks.json`이 아직 없어 자동 인증은 실패 상태(`1024`)였다. 대신 기기에서 사용자 승인으로 `test.irummate.com` 링크를 앱으로 열게 했다(`pm set-app-links-user-selection`). 앱이 주소를 받은 뒤의 동작은 자동 인증과 같다. 자동 인증은 2026-11-27에 따로 확인했다(남은 확인 첫 항목).
 - 서버: test 서버, redirect URI `https://test.irummate.com/oauth/kakao/callback`
 - 시작 상태: 앱 데이터를 지운 뒤(비로그인) 시작
 
@@ -49,7 +49,7 @@
 
 ## 남은 확인
 
-- [ ] **Android 자동 인증:** #46이 `test`에 병합되어 테스트 배포에 `assetlinks.json`이 올라간 뒤, 자동 인증이 되는지(`pm get-app-links`에서 `verified`). 사용자 승인 없이 위 결과가 같은지
+- [x] **Android 자동 인증 (2026-11-27 확인):** 테스트 배포에 `assetlinks.json`이 올라간 뒤 사용자 승인을 끄고 다시 인증하자 `pm get-app-links`에서 `test.irummate.com: verified`. 앱 데이터를 지운 상태에서 카카오 로그인 → 앱 안 브라우저 닫힘 → 가입 단계 화면 이동 → 뒤로가기 시 종료 안내까지 위 결과와 같았다(링크를 열 앱을 고르는 창 없음)
 - [ ] **iOS 실기기(uukdo):** 실제 iPhone에서 위 결과표의 다섯 항목. Associated Domains(`applinks:test.irummate.com`)는 #48에서 설정한다. 시험은 #47·#48을 병합하기 전에 한다. #46은 이미 `test`에 있으므로, `test`에서 만든 임시 브랜치에 #47·#48 브랜치를 합쳐 빌드한다(병합 전에 임시로 합쳐 시험하는 점은 Android 시험과 같다). 실패하면 결정 4에 따라 처리한다. 시뮬레이터 결과만으로는 이 결정을 확정하지 않는다
 - [ ] **로그인 도중 앱이 종료된 경우:** 카카오 로그인을 시작할 때 만든 state 값은 웹뷰의 sessionStorage에 있다. 앱 안 브라우저에 있는 동안 시스템이 앱을 종료하면 이 값이 사라져, 돌아왔을 때 대조에 실패하고 로그인 화면으로 간다(다시 로그인하면 됨). 기기에서 시험하지 않았다. 자주 일어나면 저장 위치를 다시 정한다
 - [ ] **출시 빌드:** 출시 서명(Play 앱 서명) 지문을 운영 도메인의 `assetlinks.json`에 넣는다(0006 결정 2)
